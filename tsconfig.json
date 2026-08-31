@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "references": [
+    { "path": "./packages/api" },
+    { "path": "./packages/web" },
+    { "path": "./packages/types" },
+    { "path": "./packages/db" }
+  ],
+  "files": []
+}

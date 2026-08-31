@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-ssr
+build
+.next
+out
+bun.lock
+*.log
+.vscode
+.idea

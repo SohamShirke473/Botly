@@ -1,0 +1,37 @@
+{
+  "name": "botly-monorepo",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "dev:web": "bun run --filter web dev",
+    "dev:api": "bun run --filter api dev",
+    "build": "bun run --filter '*' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "db:generate": "bun run --filter db generate",
+    "db:push": "bun run --filter db push",
+    "db:migrate": "bun run --filter db migrate",
+    "db:studio": "bun run --filter db studio",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.5",
+    "globals": "^17.11.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "typescript": "^5.7",
+    "typescript-eslint": "^8.68.0"
+  }
+}
