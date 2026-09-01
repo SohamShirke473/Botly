@@ -2,37 +2,22 @@
   "version": "8",
   "dialect": "postgres",
   "id": "6f19af1c-bc1d-4534-8c11-c973a4dc48be",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
-      "values": [
-        "pending",
-        "processing",
-        "ready",
-        "failed"
-      ],
+      "values": ["pending", "processing", "ready", "failed"],
       "name": "document_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "user",
-        "assistant",
-        "system"
-      ],
+      "values": ["user", "assistant", "system"],
       "name": "message_role",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "pdf",
-        "text",
-        "url"
-      ],
+      "values": ["pdf", "text", "url"],
       "name": "source_type",
       "entityType": "enums",
       "schema": "public"
@@ -570,14 +555,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "document_id"
-      ],
+      "columns": ["document_id"],
       "schemaTo": "public",
       "tableTo": "documents",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "chunks_document_id_documents_id_fkey",
@@ -587,14 +568,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "bot_id"
-      ],
+      "columns": ["bot_id"],
       "schemaTo": "public",
       "tableTo": "bots",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "chunks_bot_id_bots_id_fkey",
@@ -604,14 +581,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "bot_id"
-      ],
+      "columns": ["bot_id"],
       "schemaTo": "public",
       "tableTo": "bots",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "conversations_bot_id_bots_id_fkey",
@@ -621,14 +594,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "bot_id"
-      ],
+      "columns": ["bot_id"],
       "schemaTo": "public",
       "tableTo": "bots",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "documents_bot_id_bots_id_fkey",
@@ -638,14 +607,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "conversation_id"
-      ],
+      "columns": ["conversation_id"],
       "schemaTo": "public",
       "tableTo": "conversations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "messages_conversation_id_conversations_id_fkey",
@@ -654,9 +619,7 @@
       "table": "messages"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "bots_pkey",
       "schema": "public",
@@ -664,9 +627,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "chunks_pkey",
       "schema": "public",
@@ -674,9 +635,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "conversations_pkey",
       "schema": "public",
@@ -684,9 +643,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "documents_pkey",
       "schema": "public",
@@ -694,9 +651,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "messages_pkey",
       "schema": "public",

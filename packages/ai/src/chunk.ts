@@ -12,7 +12,11 @@ export interface TextChunk {
   tokenCount: number
 }
 
-function splitText(text: string, separators: string[], chunkSize: number): string[] {
+function splitText(
+  text: string,
+  separators: string[],
+  chunkSize: number
+): string[] {
   if (text.length <= chunkSize) return [text]
 
   let sep = separators[separators.length - 1]
@@ -38,24 +42,41 @@ function splitText(text: string, separators: string[], chunkSize: number): strin
   return result
 }
 
-export function chunkText(text: string, options: ChunkOptions = {}): TextChunk[] {
+export function chunkText(
+  text: string,
+  options: ChunkOptions = {}
+): TextChunk[] {
   if (!text || !text.trim()) return []
 
   const rawText = text.trim()
   const chunkSize = Math.max(50, options.chunkSize ?? 800)
-  const chunkOverlap = Math.min(Math.floor(chunkSize / 2), Math.max(0, options.chunkOverlap ?? 150))
-  const separators = options.separators ?? ["\n\n", "\n", ". ", "? ", "! ", " ", ""]
+  const chunkOverlap = Math.min(
+    Math.floor(chunkSize / 2),
+    Math.max(0, options.chunkOverlap ?? 150)
+  )
+  const separators = options.separators ?? [
+    "\n\n",
+    "\n",
+    ". ",
+    "? ",
+    "! ",
+    " ",
+    "",
+  ]
 
   const splits = splitText(rawText, separators, chunkSize)
   const chunks: string[] = []
-  let currentGroup: string[] = []
+  const currentGroup: string[] = []
   let currentLength = 0
 
   for (const split of splits) {
     const splitLen = split.length
     const sepLen = currentGroup.length > 0 ? 1 : 0
 
-    if (currentLength + sepLen + splitLen > chunkSize && currentGroup.length > 0) {
+    if (
+      currentLength + sepLen + splitLen > chunkSize &&
+      currentGroup.length > 0
+    ) {
       const merged = currentGroup.join(" ").trim()
       if (merged) chunks.push(merged)
 

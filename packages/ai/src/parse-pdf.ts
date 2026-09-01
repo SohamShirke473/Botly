@@ -14,7 +14,8 @@ export interface ParsedPdfResult {
 
 function toUint8Array(data: Buffer | Uint8Array | ArrayBuffer): Uint8Array {
   if (data instanceof ArrayBuffer) return new Uint8Array(data)
-  if (ArrayBuffer.isView(data)) return new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+  if (ArrayBuffer.isView(data))
+    return new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
   return new Uint8Array(data)
 }
 

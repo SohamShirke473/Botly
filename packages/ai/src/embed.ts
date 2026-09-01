@@ -1,7 +1,4 @@
-import {
-  embed as sdkEmbed,
-  embedMany as sdkEmbedMany,
-} from "ai"
+import { embed as sdkEmbed, embedMany as sdkEmbedMany } from "ai"
 import { mistral, DEFAULT_EMBEDDING_MODEL } from "./client"
 
 export type SdkEmbedParams = Parameters<typeof sdkEmbed>[0]

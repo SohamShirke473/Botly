@@ -1,13 +1,16 @@
-import { Routes, Route, useNavigate } from "react-router-dom"
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
 import { ClerkProvider } from "@clerk/react"
 import { dark } from "@clerk/themes"
 import { ThemeProvider, useTheme } from "@/components/theme-provider"
 import { QueryProvider } from "@/providers/query-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "@/components/ui/sonner"
 import { RootLayout } from "@/layouts/root-layout"
-import { HomePage } from "@/pages/home-page"
 import { DashboardPage } from "@/pages/dashboard-page"
-import { OrganizationPage } from "@/pages/organization-page"
-import { NotFoundPage } from "@/pages/not-found-page"
+import { BotListPage } from "@/pages/bot-list-page"
+import { CreateBotPage } from "@/pages/create-bot-page"
+import { BotDetailPage } from "@/pages/bot-detail-page"
+import { SettingsPage } from "@/pages/settings-page"
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -41,14 +44,20 @@ export function App() {
     <ThemeProvider>
       <ClerkProviderWithTheme>
         <QueryProvider>
-          <Routes>
-            <Route path="/" element={<RootLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="organization" element={<OrganizationPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
+          <TooltipProvider>
+            <Routes>
+              <Route path="/" element={<RootLayout />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<DashboardPage />}>
+                  <Route index element={<BotListPage />} />
+                  <Route path="bots/new" element={<CreateBotPage />} />
+                  <Route path="bots/:id" element={<BotDetailPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                </Route>
+              </Route>
+            </Routes>
+            <Toaster />
+          </TooltipProvider>
         </QueryProvider>
       </ClerkProviderWithTheme>
     </ThemeProvider>
