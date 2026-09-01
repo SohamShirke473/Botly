@@ -1,0 +1,23 @@
+{
+  "name": "@botly/inngest",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "NPM_CONFIG_CACHE=$(mktemp -d) npx --ignore-scripts=false inngest-cli@latest dev -u http://localhost:3001/api/inngest"
+  },
+  "dependencies": {
+    "inngest": "^4.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^5.7"
+  }
+}

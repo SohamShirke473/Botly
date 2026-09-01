@@ -7,9 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --filter '*' dev",
+    "dev": "bun run --filter 'web' dev & bun run --filter 'api' dev",
     "dev:web": "bun run --filter web dev",
     "dev:api": "bun run --filter api dev",
+    "dev:inngest": "bun run --filter @botly/inngest dev",
     "build": "bun run --filter '*' build",
     "typecheck": "bun run --filter '*' typecheck",
     "db:generate": "bun run --filter db generate",

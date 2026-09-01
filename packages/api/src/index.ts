@@ -8,6 +8,8 @@ import helmet from "helmet"
 import pino from "pino"
 import pinoHttp from "pino-http"
 import { clerkMiddleware, clerkClient, getAuth } from "@clerk/express"
+import { serve } from "inngest/express"
+import { inngest, functions } from "@botly/inngest"
 import type { HealthCheckResponse, MessageResponse } from "types"
 
 export const logger = pino(
@@ -90,6 +92,30 @@ app.get("/api/message", (_req, res) => {
   }
   res.status(200).json(data)
 })
+
+// --- Inngest ---
+
+// Serve the Inngest endpoint — Inngest Dev Server (or Cloud) will POST here
+app.use("/api/inngest", serve({ client: inngest, functions }))
+
+// Test route: hit GET /api/hello to send a test event to Inngest
+app.get(
+  "/api/hello",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await inngest.send({
+        name: "test/hello.world",
+        data: { email: "test@example.com" },
+      })
+      res.json({
+        message:
+          "Event sent! Check Inngest Dev Server at http://localhost:8288",
+      })
+    } catch (err) {
+      next(err)
+    }
+  }
+)
 
 // Protected route (authenticated with Clerk)
 const handleProtected = async (req: Request, res: Response): Promise<void> => {

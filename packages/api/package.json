@@ -10,11 +10,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@botly/inngest": "workspace:*",
     "@clerk/express": "^2.1.64",
     "cors": "^2.8.6",
     "db": "workspace:*",
     "express": "^5.2.1",
     "helmet": "^8.3.0",
+    "inngest": "^4.18.1",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "types": "workspace:*"
