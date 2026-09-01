@@ -1,79 +1,57 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import type { HealthCheckResponse } from "types"
+import { Routes, Route, useNavigate } from "react-router-dom"
+import { ClerkProvider } from "@clerk/react"
+import { dark } from "@clerk/themes"
+import { ThemeProvider, useTheme } from "@/components/theme-provider"
+import { QueryProvider } from "@/providers/query-provider"
+import { RootLayout } from "@/layouts/root-layout"
+import { HomePage } from "@/pages/home-page"
+import { DashboardPage } from "@/pages/dashboard-page"
+import { OrganizationPage } from "@/pages/organization-page"
+import { NotFoundPage } from "@/pages/not-found-page"
 
-export function App() {
-  const [apiResponse, setApiResponse] = useState<HealthCheckResponse | null>(
-    null
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error(
+    "Missing Publishable Key: please define VITE_CLERK_PUBLISHABLE_KEY in .env"
   )
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+}
 
-  const checkApiHealth = async () => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const baseUrl = import.meta.env.VITE_API_URL || ""
-      const res = await fetch(`${baseUrl}/api/health`)
-      const data: HealthCheckResponse = await res.json()
-      setApiResponse(data)
-    } catch (err) {
-      setError(`Error connecting to API: ${(err as Error).message}`)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+function ClerkProviderWithTheme({ children }: { children: React.ReactNode }) {
+  const { isDark } = useTheme()
+  const navigate = useNavigate()
 
   return (
-    <div className="bg-background text-foreground flex min-h-svh flex-col items-center justify-center p-6">
-      <div className="flex w-full max-w-lg flex-col gap-6 rounded-xl border p-8 shadow-sm">
-        <div>
-          <div className="bg-primary/10 text-primary mb-2 inline-block rounded-full px-3 py-1 text-xs font-semibold">
-            Bun Monorepo
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Botly Monorepo Ready
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            React (Vite + shadcn UI) & Express API (Bun + TypeScript)
-          </p>
-        </div>
+    <ClerkProvider
+      publishableKey={PUBLISHABLE_KEY}
+      routerPush={(to) => navigate(to)}
+      routerReplace={(to) => navigate(to, { replace: true })}
+      afterSignOutUrl="/"
+      appearance={{
+        theme: isDark ? dark : undefined,
+      }}
+    >
+      {children}
+    </ClerkProvider>
+  )
+}
 
-        <div className="bg-muted/40 space-y-1 rounded-lg border p-4 font-mono text-xs">
-          <div>
-            <span className="text-foreground font-semibold">packages/web:</span>{" "}
-            React 19 + Tailwind v4 + shadcn
-          </div>
-          <div>
-            <span className="text-foreground font-semibold">packages/api:</span>{" "}
-            Express + TypeScript + Morgan + Helmet
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Button onClick={checkApiHealth} disabled={isLoading}>
-            {isLoading ? "Checking API..." : "Ping Express API (port 3001)"}
-          </Button>
-
-          {apiResponse && (
-            <pre className="mt-2 overflow-x-auto rounded-lg bg-zinc-900 p-4 text-xs text-zinc-100">
-              {JSON.stringify(apiResponse, null, 2)}
-            </pre>
-          )}
-
-          {error && (
-            <div className="bg-destructive/10 text-destructive mt-2 rounded-lg p-3 text-xs">
-              {error}
-            </div>
-          )}
-        </div>
-
-        <div className="text-muted-foreground font-mono text-xs">
-          (Press <kbd className="rounded border px-1 py-0.5">d</kbd> to toggle
-          dark mode)
-        </div>
-      </div>
-    </div>
+export function App() {
+  return (
+    <ThemeProvider>
+      <ClerkProviderWithTheme>
+        <QueryProvider>
+          <Routes>
+            <Route path="/" element={<RootLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="organization" element={<OrganizationPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        </QueryProvider>
+      </ClerkProviderWithTheme>
+    </ThemeProvider>
   )
 }
 

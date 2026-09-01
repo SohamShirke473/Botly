@@ -13,6 +13,8 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme
+  resolvedTheme: ResolvedTheme
+  isDark: boolean
   setTheme: (theme: Theme) => void
 }
 
@@ -93,6 +95,12 @@ export function ThemeProvider({
     return defaultTheme
   })
 
+  const [systemTheme, setSystemTheme] = React.useState<ResolvedTheme>(() =>
+    typeof window !== "undefined" ? getSystemTheme() : "light"
+  )
+
+  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme
+
   const setTheme = React.useCallback(
     (nextTheme: Theme) => {
       localStorage.setItem(storageKey, nextTheme)
@@ -102,16 +110,14 @@ export function ThemeProvider({
   )
 
   const applyTheme = React.useCallback(
-    (nextTheme: Theme) => {
+    (resolved: ResolvedTheme) => {
       const root = document.documentElement
-      const resolvedTheme =
-        nextTheme === "system" ? getSystemTheme() : nextTheme
       const restoreTransitions = disableTransitionOnChange
         ? disableTransitionsTemporarily()
         : null
 
       root.classList.remove("light", "dark")
-      root.classList.add(resolvedTheme)
+      root.classList.add(resolved)
 
       if (restoreTransitions) {
         restoreTransitions()
@@ -121,7 +127,7 @@ export function ThemeProvider({
   )
 
   React.useEffect(() => {
-    applyTheme(theme)
+    applyTheme(resolvedTheme)
 
     if (theme !== "system") {
       return undefined
@@ -129,7 +135,7 @@ export function ThemeProvider({
 
     const mediaQuery = window.matchMedia(COLOR_SCHEME_QUERY)
     const handleChange = () => {
-      applyTheme("system")
+      setSystemTheme(getSystemTheme())
     }
 
     mediaQuery.addEventListener("change", handleChange)
@@ -137,7 +143,7 @@ export function ThemeProvider({
     return () => {
       mediaQuery.removeEventListener("change", handleChange)
     }
-  }, [theme, applyTheme])
+  }, [theme, resolvedTheme, applyTheme])
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -207,9 +213,11 @@ export function ThemeProvider({
   const value = React.useMemo(
     () => ({
       theme,
+      resolvedTheme,
+      isDark: resolvedTheme === "dark",
       setTheme,
     }),
-    [theme, setTheme]
+    [theme, resolvedTheme, setTheme]
   )
 
   return (

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/express": "^2.1.64",
     "cors": "^2.8.6",
     "db": "workspace:*",
     "express": "^5.2.1",

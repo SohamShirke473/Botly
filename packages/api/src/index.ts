@@ -7,6 +7,7 @@ import cors from "cors"
 import helmet from "helmet"
 import pino from "pino"
 import pinoHttp from "pino-http"
+import { clerkMiddleware, clerkClient, getAuth } from "@clerk/express"
 import type { HealthCheckResponse, MessageResponse } from "types"
 
 export const logger = pino(
@@ -29,6 +30,9 @@ export const logger = pino(
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Disable ETag caching on dynamic API responses so auth & org state is always fresh
+app.disable("etag")
+
 // 1. Security headers
 app.use(helmet())
 
@@ -36,17 +40,35 @@ app.use(helmet())
 app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN || "*",
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 )
 
-// 3. HTTP request logging via Pino
-app.use(pinoHttp({ logger }))
+// 3. HTTP request logging via Pino (clean formatting without dumping raw headers)
+app.use(
+  pinoHttp({
+    logger,
+    serializers: {
+      req: (req) => ({
+        id: req.id,
+        method: req.method,
+        url: req.url,
+      }),
+      res: (res) => ({
+        statusCode: res.statusCode,
+      }),
+    },
+  })
+)
 
 // 4. Body parsing
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// 5. Clerk authentication middleware
+app.use(clerkMiddleware())
 
 // --- Routes ---
 
@@ -68,6 +90,80 @@ app.get("/api/message", (_req, res) => {
   }
   res.status(200).json(data)
 })
+
+// Protected route (authenticated with Clerk)
+const handleProtected = async (req: Request, res: Response): Promise<void> => {
+  const { isAuthenticated, userId } = getAuth(req)
+
+  if (!isAuthenticated || !userId) {
+    res.status(401).json({ error: "User not authenticated" })
+    return
+  }
+
+  try {
+    const user = await clerkClient.users.getUser(userId)
+    res.json({
+      message: "Authenticated successfully with Clerk",
+      userId,
+      user,
+    })
+  } catch (err) {
+    logger.error(err, "Failed to retrieve user from Clerk")
+    res.status(500).json({ error: "Failed to retrieve user profile" })
+  }
+}
+
+app.get("/protected", handleProtected)
+app.get("/api/protected", handleProtected)
+
+// Organization route (authenticated with Clerk, checks active organization)
+const handleOrganization = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { isAuthenticated, userId, orgId, orgRole, orgSlug, orgPermissions } =
+    getAuth(req)
+
+  if (!isAuthenticated || !userId) {
+    res.status(401).json({ error: "User not authenticated" })
+    return
+  }
+
+  if (!orgId) {
+    res.status(200).json({
+      hasActiveOrg: false,
+      message: "No active organization selected in the current Clerk session",
+      userId,
+      orgId: null,
+      orgRole: null,
+      orgSlug: null,
+    })
+    return
+  }
+
+  try {
+    const organization = await clerkClient.organizations.getOrganization({
+      organizationId: orgId,
+    })
+
+    res.json({
+      hasActiveOrg: true,
+      message: "Active organization retrieved successfully",
+      userId,
+      orgId,
+      orgRole,
+      orgSlug,
+      orgPermissions: orgPermissions || [],
+      organization,
+    })
+  } catch (err) {
+    logger.error(err, "Failed to retrieve organization from Clerk")
+    res.status(500).json({ error: "Failed to retrieve organization details" })
+  }
+}
+
+app.get("/organization", handleOrganization)
+app.get("/api/organization", handleOrganization)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

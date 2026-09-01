@@ -128,3 +128,26 @@
     @apply font-sans;
   }
 }
+
+/* Clerk Dark Mode Visibility Fixes */
+.dark .cl-organizationSwitcherTrigger,
+.dark .cl-organizationPreviewMainIdentifier,
+.dark .cl-organizationPreviewTextContainer,
+.dark .cl-organizationSwitcherTriggerIcon {
+  color: var(--foreground) !important;
+}
+
+.dark .cl-organizationSwitcherTrigger {
+  border-color: var(--border) !important;
+  background-color: transparent !important;
+}
+
+.dark .cl-organizationSwitcherTrigger:hover {
+  background-color: var(--muted) !important;
+}
+
+.dark .cl-organizationSwitcherPopoverCard {
+  background-color: var(--popover) !important;
+  border-color: var(--border) !important;
+  color: var(--popover-foreground) !important;
+}
