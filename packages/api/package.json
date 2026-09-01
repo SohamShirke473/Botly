@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1123.0",
     "@botly/inngest": "workspace:*",
     "@clerk/express": "^2.1.64",
     "cors": "^2.8.6",
