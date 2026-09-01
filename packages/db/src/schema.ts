@@ -32,7 +32,7 @@ export const chunks = pgTable("chunks", {
   documentId: uuid("document_id").references(() => documents.id).notNull(),
   botId: uuid("bot_id").references(() => bots.id).notNull(),
   content: text("content").notNull(),
-  embedding: vector("embedding", { dimensions: 1536 }),
+  embedding: vector("embedding", { dimensions: 1024 }),
   tokenCount: integer("token_count"),
 }, (table) => [
   index("chunks_document_id_idx").on(table.documentId),
