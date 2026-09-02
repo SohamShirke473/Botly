@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express"
 import { db } from "db"
 import { bots, conversations, messages } from "db/schema"
-import { eq, and, asc } from "drizzle-orm"
+import { eq, and, asc, desc } from "drizzle-orm"
 import { validate } from "../middleware/validate"
 import { chatRateLimiter } from "../middleware/rate-limit"
 import { embedText, streamText } from "@botly/ai"
@@ -242,13 +242,15 @@ chatRouter.post(
       logger.warn(err, "Embedding search failed, proceeding with prompt only")
     }
 
-    // 5. Fetch recent conversation history
-    const history = await db
+    // 5. Fetch recent conversation history (most recent 10 messages, then sort chronologically)
+    const recentMessages = await db
       .select()
       .from(messages)
       .where(eq(messages.conversationId, activeConvoId))
-      .orderBy(asc(messages.createdAt))
+      .orderBy(desc(messages.createdAt), desc(messages.id))
       .limit(10)
+
+    const history = recentMessages.reverse()
 
     // 6. Build RAG prompt with system prompt & retrieved chunks
     const priorHistory = history.slice(0, -1) // exclude current user message from history array

@@ -11,12 +11,14 @@ import {
   Database,
   Bot as BotIcon,
   Clock,
+  BarChart3,
 } from "lucide-react"
 
 import { KnowledgeBaseTab } from "./bot-detail/knowledge-base-tab"
 import { InstallTab } from "./bot-detail/install-tab"
 import { ConversationsTab } from "./bot-detail/conversations-tab"
 import { SettingsTab } from "./bot-detail/settings-tab"
+import { AnalyticsTab } from "./bot-detail/analytics-tab"
 
 export function BotDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -104,6 +106,10 @@ export function BotDetailPage() {
             <MessageSquareText className="size-3.5" />
             Conversations
           </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-1.5 text-xs">
+            <BarChart3 className="size-3.5" />
+            Analytics
+          </TabsTrigger>
           <TabsTrigger value="settings" className="gap-1.5 text-xs">
             <Settings className="size-3.5" />
             Settings
@@ -120,6 +126,10 @@ export function BotDetailPage() {
 
         <TabsContent value="conversations">
           <ConversationsTab bot={bot} />
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <AnalyticsTab bot={bot} />
         </TabsContent>
 
         <TabsContent value="settings">

@@ -41,6 +41,8 @@ export async function embedText(
   }
 }
 
+export const MAX_EMBEDDING_BATCH_SIZE = 50
+
 export async function embedManyTexts(
   texts: string[],
   options?: EmbedOptions
@@ -53,15 +55,42 @@ export async function embedManyTexts(
   const resolvedModel =
     typeof model === "string" ? mistral.embedding(model) : model
 
-  const result = await sdkEmbedMany({
-    model: resolvedModel,
-    values: texts,
-    abortSignal: options?.abortSignal,
-    providerOptions: options?.providerOptions,
-  })
+  if (texts.length <= MAX_EMBEDDING_BATCH_SIZE) {
+    const result = await sdkEmbedMany({
+      model: resolvedModel,
+      values: texts,
+      abortSignal: options?.abortSignal,
+      providerOptions: options?.providerOptions,
+    })
+
+    return {
+      embeddings: result.embeddings,
+      usage: result.usage,
+    }
+  }
+
+  // Slice into sub-batches to respect provider batch limits
+  const allEmbeddings: number[][] = []
+  let totalTokens = 0
+
+  for (let i = 0; i < texts.length; i += MAX_EMBEDDING_BATCH_SIZE) {
+    const batch = texts.slice(i, i + MAX_EMBEDDING_BATCH_SIZE)
+    const result = await sdkEmbedMany({
+      model: resolvedModel,
+      values: batch,
+      abortSignal: options?.abortSignal,
+      providerOptions: options?.providerOptions,
+    })
+
+    allEmbeddings.push(...result.embeddings)
+    if (result.usage?.tokens) {
+      totalTokens += result.usage.tokens
+    }
+  }
 
   return {
-    embeddings: result.embeddings,
-    usage: result.usage,
+    embeddings: allEmbeddings,
+    usage: { tokens: totalTokens },
   }
 }
+

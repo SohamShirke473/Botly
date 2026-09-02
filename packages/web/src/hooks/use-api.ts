@@ -7,6 +7,7 @@ import type {
   Message,
   CreateBotInput,
   WidgetConfig,
+  BotStatsResponse,
 } from "types"
 
 const baseUrl = import.meta.env.VITE_API_URL || ""
@@ -343,6 +344,25 @@ export function useMessagesQuery(conversationId: string | undefined) {
       return res.json()
     },
     enabled: !!conversationId,
+  })
+}
+
+export function useBotStatsQuery(botId: string | undefined) {
+  const getHeaders = useAuthHeaders()
+
+  return useQuery<BotStatsResponse, Error>({
+    queryKey: ["bots", botId, "stats"],
+    queryFn: async () => {
+      if (!botId) throw new Error("No bot ID provided")
+      const headers = await getHeaders()
+      const res = await fetch(`${baseUrl}/api/bots/${botId}/stats`, { headers })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || "Failed to fetch bot statistics")
+      }
+      return res.json()
+    },
+    enabled: !!botId,
   })
 }
 

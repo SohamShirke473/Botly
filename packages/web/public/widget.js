@@ -263,6 +263,18 @@
         border-top-left-radius: 4px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
       }
+      .botly-inline-code {
+        background: rgba(0, 0, 0, 0.07);
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+      }
+      .botly-link {
+        color: inherit;
+        text-decoration: underline;
+        font-weight: 500;
+      }
       .botly-typing {
         display: inline-flex;
         align-items: center;
@@ -361,6 +373,38 @@
       .replace(/'/g, "&#39;")
   }
 
+  function renderMarkdown(rawText) {
+    if (!rawText) return ""
+
+    // 1. Sanitize all HTML characters first to prevent XSS
+    let html = escapeHtml(rawText)
+
+    // 2. Bold: **text** or __text__
+    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    html = html.replace(/__(.*?)__/g, "<strong>$1</strong>")
+
+    // 3. Italic: *text* or _text_
+    html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    html = html.replace(/_([^_]+)_/g, "<em>$1</em>")
+
+    // 4. Inline code: `code`
+    html = html.replace(/`([^`]+)`/g, '<code class="botly-inline-code">$1</code>')
+
+    // 5. Links: [text](https://...)
+    html = html.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" class="botly-link">$1</a>'
+    )
+
+    // 6. Bullet lists: lines starting with "- " or "* "
+    html = html.replace(/(?:^|\n)[-*]\s+(.+)/g, "<br>• $1")
+
+    // 7. Newlines
+    html = html.replace(/\n/g, "<br>")
+
+    return html
+  }
+
   // 7. Render Widget Shell
   const bubbleBtn = document.createElement("button")
   bubbleBtn.className = "botly-bubble-btn"
@@ -440,7 +484,11 @@
 
     const bubble = document.createElement("div")
     bubble.className = "botly-bubble"
-    bubble.textContent = text
+    if (role === "assistant") {
+      bubble.innerHTML = renderMarkdown(text)
+    } else {
+      bubble.textContent = text
+    }
     row.appendChild(bubble)
 
     messagesContainer.appendChild(row)
@@ -571,7 +619,7 @@
                 hasReceivedFirstToken = true
               }
               accumulatedText += eventData.text
-              bubble.textContent = accumulatedText
+              bubble.innerHTML = renderMarkdown(accumulatedText)
               scrollToBottom()
             } else if (eventData.type === "error") {
               bubble.textContent =
