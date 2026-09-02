@@ -192,6 +192,32 @@ export function useUploadDocumentMutation() {
   })
 }
 
+export function useSubmitUrlMutation() {
+  const queryClient = useQueryClient()
+  const getHeaders = useAuthHeaders()
+
+  return useMutation<Document, Error, { botId: string; url: string }>({
+    mutationFn: async ({ botId, url }) => {
+      const headers = await getHeaders()
+      const res = await fetch(`${baseUrl}/api/bots/${botId}/documents`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to submit URL: ${url}`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["documents", variables.botId],
+      })
+    },
+  })
+}
+
 export function useDeleteDocumentMutation() {
   const queryClient = useQueryClient()
   const getHeaders = useAuthHeaders()

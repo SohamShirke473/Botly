@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import {
   useDocumentsQuery,
   useUploadDocumentMutation,
+  useSubmitUrlMutation,
   useDeleteDocumentMutation,
   useReprocessDocumentMutation,
 } from "@/hooks/use-api"
@@ -56,6 +57,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
   const docsQuery = useDocumentsQuery(bot.id)
   const uploadMutation = useUploadDocumentMutation()
+  const submitUrlMutation = useSubmitUrlMutation()
   const deleteMutation = useDeleteDocumentMutation()
   const reprocessMutation = useReprocessDocumentMutation()
   const [dragOver, setDragOver] = useState(false)
@@ -197,19 +199,32 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
         <Button
           variant="outline"
           size="sm"
-          disabled={!urlInput.trim()}
+          disabled={!urlInput.trim() || submitUrlMutation.isPending}
           onClick={() => {
-            if (!urlInput.trim()) return
-            const blob = new Blob([""], { type: "text/plain" })
-            const file = new File([blob], `${urlInput.trim()}.url`, {
-              type: "text/plain",
-            })
-            handleUpload(file)
-            setUrlInput("")
+            const url = urlInput.trim()
+            if (!url) return
+            submitUrlMutation.mutate(
+              { botId: bot.id, url },
+              {
+                onSuccess: () => {
+                  toast.success("URL submitted", {
+                    description: `"${url}" is queued for ingestion.`,
+                  })
+                  setUrlInput("")
+                },
+                onError: (err) => {
+                  toast.error("Failed to add URL", { description: err.message })
+                },
+              }
+            )
           }}
           className="gap-1.5"
         >
-          <ExternalLink className="size-3.5" />
+          {submitUrlMutation.isPending ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <ExternalLink className="size-3.5" />
+          )}
           Add URL
         </Button>
       </div>
