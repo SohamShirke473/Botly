@@ -358,6 +358,16 @@
         text-decoration: none;
         font-weight: 500;
       }
+      .botly-h1 { display: block; font-size: 15px; font-weight: 700; margin: 6px 0 2px; }
+      .botly-h2 { display: block; font-size: 14px; font-weight: 700; margin: 5px 0 2px; }
+      .botly-h3 { display: block; font-size: 13px; font-weight: 700; margin: 4px 0 1px; }
+      .botly-h4 { display: block; font-size: 12.5px; font-weight: 600; margin: 3px 0 1px; }
+      .botly-h5 { display: block; font-size: 12px; font-weight: 600; margin: 2px 0 1px; }
+      .botly-h6 { display: block; font-size: 11.5px; font-weight: 600; color: #6b7280; margin: 2px 0 1px; }
+      .botly-hr { border: none; border-top: 1px solid #e5e7eb; margin: 6px 0; }
+      .botly-ol-item { display: inline; }
+      .botly-ol-num { font-weight: 600; min-width: 1.2em; display: inline-block; }
+      .botly-li { display: inline; }
     `
   }
 
@@ -376,31 +386,47 @@
   function renderMarkdown(rawText) {
     if (!rawText) return ""
 
-    // 1. Sanitize all HTML characters first to prevent XSS
     let html = escapeHtml(rawText)
 
-    // 2. Bold: **text** or __text__
-    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    html = html.replace(/__(.*?)__/g, "<strong>$1</strong>")
+    // Headings: #### before ### before ## before # (most specific first)
+    html = html.replace(/^######\s+(.+)$/gm, '<span class="botly-h6">$1</span>')
+    html = html.replace(/^#####\s+(.+)$/gm, '<span class="botly-h5">$1</span>')
+    html = html.replace(/^####\s+(.+)$/gm, '<span class="botly-h4">$1</span>')
+    html = html.replace(/^###\s+(.+)$/gm, '<span class="botly-h3">$1</span>')
+    html = html.replace(/^##\s+(.+)$/gm, '<span class="botly-h2">$1</span>')
+    html = html.replace(/^#\s+(.+)$/gm, '<span class="botly-h1">$1</span>')
 
-    // 3. Italic: *text* or _text_
-    html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>")
-    html = html.replace(/_([^_]+)_/g, "<em>$1</em>")
+    // Horizontal rule
+    html = html.replace(/^[-*]{3,}$/gm, '<hr class="botly-hr">')
 
-    // 4. Inline code: `code`
+    // Bold and italic
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    html = html.replace(/__(.*?)__/g, '<strong>$1</strong>')
+    html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+    html = html.replace(/_([^_\n]+)_/g, '<em>$1</em>')
+
+    // Inline code
     html = html.replace(/`([^`]+)`/g, '<code class="botly-inline-code">$1</code>')
 
-    // 5. Links: [text](https://...)
+    // Links
     html = html.replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="botly-link">$1</a>'
     )
 
-    // 6. Bullet lists: lines starting with "- " or "* "
-    html = html.replace(/(?:^|\n)[-*]\s+(.+)/g, "<br>• $1")
+    // Ordered lists: preserve the number
+    html = html.replace(/(?:^|\n)(\d+)\.\s+(.+)/g,
+      '<br><span class="botly-ol-item"><span class="botly-ol-num">$1.</span>\u00a0$2</span>'
+    )
 
-    // 7. Newlines
-    html = html.replace(/\n/g, "<br>")
+    // Unordered lists
+    html = html.replace(/(?:^|\n)[-*]\s+(.+)/g, '<br><span class="botly-li">\u2022\u00a0$1</span>')
+
+    // Remaining newlines
+    html = html.replace(/\n/g, '<br>')
+
+    // Clean up <br> immediately before a heading span
+    html = html.replace(/(<br\s*\/?>)+(<span class="botly-h)/g, '<br>$2')
 
     return html
   }
