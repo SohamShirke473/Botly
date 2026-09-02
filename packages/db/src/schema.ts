@@ -41,11 +41,12 @@ export const documents = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     botId: uuid("bot_id")
-      .references(() => bots.id)
+      .references(() => bots.id, { onDelete: "cascade" })
       .notNull(),
     filename: text("filename").notNull(),
     sourceType: sourceTypeEnum("source_type").notNull(),
     status: documentStatusEnum("status").notNull().default("pending"),
+    storageKey: text("storage_key"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [index("documents_bot_id_idx").on(table.botId)]
@@ -56,10 +57,10 @@ export const chunks = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     documentId: uuid("document_id")
-      .references(() => documents.id)
+      .references(() => documents.id, { onDelete: "cascade" })
       .notNull(),
     botId: uuid("bot_id")
-      .references(() => bots.id)
+      .references(() => bots.id, { onDelete: "cascade" })
       .notNull(),
     content: text("content").notNull(),
     embedding: vector("embedding", { dimensions: 1024 }),
@@ -80,7 +81,7 @@ export const conversations = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     botId: uuid("bot_id")
-      .references(() => bots.id)
+      .references(() => bots.id, { onDelete: "cascade" })
       .notNull(),
     visitorId: text("visitor_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -93,7 +94,7 @@ export const messages = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     conversationId: uuid("conversation_id")
-      .references(() => conversations.id)
+      .references(() => conversations.id, { onDelete: "cascade" })
       .notNull(),
     role: messageRoleEnum("role").notNull(),
     content: text("content").notNull(),
@@ -101,3 +102,4 @@ export const messages = pgTable(
   },
   (table) => [index("messages_conversation_id_idx").on(table.conversationId)]
 )
+

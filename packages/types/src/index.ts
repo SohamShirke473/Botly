@@ -82,7 +82,37 @@ export type DocumentStatus = z.infer<typeof DocumentStatusSchema>
 export const SourceTypeSchema = z.enum(["pdf", "text", "url"])
 export type SourceType = z.infer<typeof SourceTypeSchema>
 
-// Bot
+// ─── Route Param Validation Schemas ─────────────────────────────────
+
+export const BotIdParamSchema = z.object({
+  botId: z.string().uuid("Invalid Bot ID"),
+})
+export type BotIdParam = z.infer<typeof BotIdParamSchema>
+
+export const DocIdParamSchema = z.object({
+  docId: z.string().uuid("Invalid Document ID"),
+})
+export type DocIdParam = z.infer<typeof DocIdParamSchema>
+
+export const DocumentBotParamSchema = z.object({
+  botId: z.string().uuid("Invalid Bot ID"),
+  docId: z.string().uuid("Invalid Document ID"),
+})
+export type DocumentBotParam = z.infer<typeof DocumentBotParamSchema>
+
+export const ConvoIdParamSchema = z.object({
+  botId: z.string().uuid("Invalid Bot ID"),
+  convoId: z.string().uuid("Invalid Conversation ID"),
+})
+export type ConvoIdParam = z.infer<typeof ConvoIdParamSchema>
+
+export const SingleConvoIdParamSchema = z.object({
+  convoId: z.string().uuid("Invalid Conversation ID"),
+})
+export type SingleConvoIdParam = z.infer<typeof SingleConvoIdParamSchema>
+
+// ─── Bot Schemas ────────────────────────────────────────────────────
+
 export const BotSchema = z.object({
   id: z.string().uuid(),
   org_id: z.string(),
@@ -91,17 +121,24 @@ export const BotSchema = z.object({
   widget_config: WidgetConfigSchema.nullable(),
   created_at: z.string(),
 })
-
 export type Bot = z.infer<typeof BotSchema>
 
 export const CreateBotSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
-  system_prompt: z.string().optional(),
+  system_prompt: z.string().max(4000).optional(),
+  widget_config: WidgetConfigSchema.optional(),
 })
-
 export type CreateBotInput = z.infer<typeof CreateBotSchema>
 
-// Document
+export const UpdateBotSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  system_prompt: z.string().max(4000).nullable().optional(),
+  widget_config: WidgetConfigSchema.optional(),
+})
+export type UpdateBotInput = z.infer<typeof UpdateBotSchema>
+
+// ─── Document Schemas ───────────────────────────────────────────────
+
 export const DocumentSchema = z.object({
   id: z.string().uuid(),
   bot_id: z.string().uuid(),
@@ -111,10 +148,20 @@ export const DocumentSchema = z.object({
   chunk_count: z.number().optional(),
   created_at: z.string(),
 })
-
 export type Document = z.infer<typeof DocumentSchema>
 
-// Conversation
+export const UploadUrlDocumentSchema = z.object({
+  url: z.string().url("Must be a valid URL (http/https)"),
+})
+export type UploadUrlDocumentInput = z.infer<typeof UploadUrlDocumentSchema>
+
+export const DocumentStatusUpdateSchema = z.object({
+  status: DocumentStatusSchema,
+})
+export type DocumentStatusUpdate = z.infer<typeof DocumentStatusUpdateSchema>
+
+// ─── Chat / Conversation Schemas ────────────────────────────────────
+
 export const ConversationSchema = z.object({
   id: z.string().uuid(),
   bot_id: z.string().uuid(),
@@ -123,10 +170,8 @@ export const ConversationSchema = z.object({
   last_message: z.string().optional(),
   message_count: z.number().optional(),
 })
-
 export type Conversation = z.infer<typeof ConversationSchema>
 
-// Message
 export const MessageSchema = z.object({
   id: z.string().uuid(),
   conversation_id: z.string().uuid(),
@@ -134,5 +179,51 @@ export const MessageSchema = z.object({
   content: z.string(),
   created_at: z.string(),
 })
-
 export type Message = z.infer<typeof MessageSchema>
+
+export const StartConversationSchema = z.object({
+  visitorId: z.string().min(1, "visitorId is required"),
+})
+export type StartConversationInput = z.infer<typeof StartConversationSchema>
+
+export const SendChatMessageSchema = z.object({
+  conversationId: z.string().uuid("Invalid conversation ID").optional(),
+  visitorId: z.string().min(1, "visitorId is required"),
+  message: z.string().min(1, "Message cannot be empty").max(4000),
+})
+export type SendChatMessageInput = z.infer<typeof SendChatMessageSchema>
+
+// ─── Embed & Public Config Schemas ──────────────────────────────────
+
+export const BotPublicConfigSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  widgetConfig: WidgetConfigSchema,
+})
+export type BotPublicConfig = z.infer<typeof BotPublicConfigSchema>
+
+export const EmbedSnippetResponseSchema = z.object({
+  botId: z.string().uuid(),
+  snippet: z.string(),
+  scriptUrl: z.string(),
+})
+export type EmbedSnippetResponse = z.infer<typeof EmbedSnippetResponseSchema>
+
+// ─── Analytics / Stats Schemas ──────────────────────────────────────
+
+export const DailyMessageStatSchema = z.object({
+  date: z.string(),
+  count: z.number(),
+})
+export type DailyMessageStat = z.infer<typeof DailyMessageStatSchema>
+
+export const BotStatsResponseSchema = z.object({
+  totalMessages: z.number(),
+  activeConversations: z.number(),
+  totalDocuments: z.number(),
+  readyDocuments: z.number(),
+  totalChunks: z.number(),
+  messagesPerDay: z.array(DailyMessageStatSchema),
+})
+export type BotStatsResponse = z.infer<typeof BotStatsResponseSchema>
+

@@ -17,10 +17,10 @@
     }
   },
   "scripts": {
-    "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
-    "push": "drizzle-kit push",
-    "studio": "drizzle-kit studio",
+    "generate": "bun --bun drizzle-kit generate",
+    "migrate": "bun --bun drizzle-kit migrate",
+    "push": "bun --bun drizzle-kit push",
+    "studio": "bun --bun drizzle-kit studio",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

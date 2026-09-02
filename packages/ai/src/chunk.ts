@@ -109,6 +109,7 @@ export function chunkText(
       index,
       charStart,
       charEnd,
+      // Heuristic: ~4 characters per token for standard English BPE tokenizers (OpenAI, Mistral)
       tokenCount: Math.max(1, Math.ceil(content.length / 4)),
     }
   })

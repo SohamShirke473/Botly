@@ -3,52 +3,80 @@ import express, {
   type Response,
   type NextFunction,
 } from "express"
+import path from "node:path"
+import fs from "node:fs"
 import cors from "cors"
 import helmet from "helmet"
-import pino from "pino"
 import pinoHttp from "pino-http"
 import { clerkMiddleware, clerkClient, getAuth } from "@clerk/express"
 import { serve } from "inngest/express"
 import { inngest, functions } from "@botly/inngest"
 import type { HealthCheckResponse, MessageResponse } from "types"
 
-export const logger = pino(
-  process.env.NODE_ENV !== "production"
-    ? {
-        transport: {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            translateTime: "SYS:standard",
-            ignore: "pid,hostname",
-          },
-        },
-      }
-    : {
-        level: process.env.LOG_LEVEL || "info",
-      }
-)
+import { botsRouter } from "./routes/bots"
+import {
+  documentsRouter,
+  botDocumentsRouter,
+} from "./routes/documents"
+import { chatRouter } from "./routes/chat"
+import {
+  analyticsRouter,
+  directConversationsRouter,
+} from "./routes/analytics"
+import { internalRouter } from "./routes/internal"
+
+import { logger } from "./lib/logger"
+export { logger }
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// Disable ETag caching on dynamic API responses so auth & org state is always fresh
+// Disable ETag caching on dynamic API responses
 app.disable("etag")
 
-// 1. Security headers
-app.use(helmet())
-
-// 2. CORS configuration
+// 1. Security headers (relaxed for widget script embed)
 app.use(
-  cors({
-    origin: process.env.CLIENT_ORIGIN || "*",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 )
 
-// 3. HTTP request logging via Pino (clean formatting without dumping raw headers)
+// 2. CORS configuration for dashboard & API routes
+// Gated behind CLIENT_ORIGIN in production; wildcard allowed only in development
+const isProduction = process.env.NODE_ENV === "production"
+const clientOrigin = process.env.CLIENT_ORIGIN
+
+if (isProduction && !clientOrigin) {
+  throw new Error("CLIENT_ORIGIN env var is required in production")
+}
+
+const allowedOrigins = clientOrigin
+  ? clientOrigin.split(",").map((o) => o.trim())
+  : []
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like server-to-server, curl, tests)
+      if (!origin) return callback(null, true)
+
+      // In development, allow all origins
+      if (!isProduction) return callback(null, true)
+
+      // In production, strictly enforce allowed origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`))
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-internal-secret"],
+  })
+)
+
+// 3. HTTP request logging via Pino
 app.use(
   pinoHttp({
     logger,
@@ -65,16 +93,35 @@ app.use(
   })
 )
 
-// 4. Body parsing
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+// 4. Standalone Embeddable Widget Script Endpoint
+const WIDGET_SCRIPT_PATHS = [
+  path.resolve(import.meta.dir, "../../web/public/widget.js"),
+  path.resolve(process.cwd(), "packages/web/public/widget.js"),
+]
 
-// 5. Clerk authentication middleware
+app.get("/widget.js", (_req: Request, res: Response) => {
+  for (const widgetPath of WIDGET_SCRIPT_PATHS) {
+    if (fs.existsSync(widgetPath)) {
+      res.setHeader("Content-Type", "application/javascript; charset=utf-8")
+      res.setHeader("Access-Control-Allow-Origin", "*")
+      res.setHeader("Cache-Control", "public, max-age=3600")
+      res.sendFile(widgetPath)
+      return
+    }
+  }
+
+  res.status(404).send("// widget.js not found")
+})
+
+// 5. Body parsing
+app.use(express.json({ limit: "10mb" }))
+app.use(express.urlencoded({ extended: true, limit: "10mb" }))
+
+// 6. Clerk authentication middleware
 app.use(clerkMiddleware())
 
-// --- Routes ---
+// --- Health & Diagnostic Routes ---
 
-// Health check endpoint
 app.get("/api/health", (_req, res) => {
   const data: HealthCheckResponse = {
     status: "ok",
@@ -85,23 +132,20 @@ app.get("/api/health", (_req, res) => {
   res.status(200).json(data)
 })
 
-// Sample greeting endpoint
 app.get("/api/message", (_req, res) => {
   const data: MessageResponse = {
-    message: "Hello from Express API running with Bun & TypeScript!",
+    message: "Hello from Botly API running with Bun & TypeScript!",
   }
   res.status(200).json(data)
 })
 
-// --- Inngest ---
-
-// Serve the Inngest endpoint — Inngest Dev Server (or Cloud) will POST here
+// --- Inngest Dev Server / Cloud Handler ---
 app.use("/api/inngest", serve({ client: inngest, functions }))
 
-// Test route: hit GET /api/hello to send a test event to Inngest
+// Test route for Inngest
 app.get(
   "/api/hello",
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (_req: Request, res: Response, next: NextFunction) => {
     try {
       await inngest.send({
         name: "test/hello.world",
@@ -117,79 +161,72 @@ app.get(
   }
 )
 
-// Protected route (authenticated with Clerk)
-const handleProtected = async (req: Request, res: Response): Promise<void> => {
-  const { isAuthenticated, userId } = getAuth(req)
+// Clerk Organization diagnostic endpoint
+app.get(
+  "/api/organization",
+  async (req: Request, res: Response): Promise<void> => {
+    const { isAuthenticated, userId, orgId, orgRole, orgSlug, orgPermissions } =
+      getAuth(req)
 
-  if (!isAuthenticated || !userId) {
-    res.status(401).json({ error: "User not authenticated" })
-    return
+    if (!isAuthenticated || !userId) {
+      res.status(401).json({ error: "User not authenticated" })
+      return
+    }
+
+    if (!orgId) {
+      res.status(200).json({
+        hasActiveOrg: false,
+        message: "No active organization selected in current Clerk session",
+        userId,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+      })
+      return
+    }
+
+    try {
+      const organization = await clerkClient.organizations.getOrganization({
+        organizationId: orgId,
+      })
+
+      res.json({
+        hasActiveOrg: true,
+        message: "Active organization retrieved successfully",
+        userId,
+        orgId,
+        orgRole,
+        orgSlug,
+        orgPermissions: orgPermissions || [],
+        organization,
+      })
+    } catch (err) {
+      logger.error(err, "Failed to retrieve organization from Clerk")
+      res.status(500).json({ error: "Failed to retrieve organization details" })
+    }
   }
+)
 
-  try {
-    const user = await clerkClient.users.getUser(userId)
-    res.json({
-      message: "Authenticated successfully with Clerk",
-      userId,
-      user,
-    })
-  } catch (err) {
-    logger.error(err, "Failed to retrieve user from Clerk")
-    res.status(500).json({ error: "Failed to retrieve user profile" })
-  }
-}
+// --- Domain Route Mounts ---
 
-app.get("/protected", handleProtected)
-app.get("/api/protected", handleProtected)
+// Bots CRUD & Embed snippet
+app.use("/api/bots", botsRouter)
 
-// Organization route (authenticated with Clerk, checks active organization)
-const handleOrganization = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const { isAuthenticated, userId, orgId, orgRole, orgSlug, orgPermissions } =
-    getAuth(req)
+// Bot-scoped documents: /api/bots/:botId/documents
+app.use("/api/bots/:botId/documents", botDocumentsRouter)
 
-  if (!isAuthenticated || !userId) {
-    res.status(401).json({ error: "User not authenticated" })
-    return
-  }
+// Direct document operations: /api/documents/:docId
+app.use("/api/documents", documentsRouter)
 
-  if (!orgId) {
-    res.status(200).json({
-      hasActiveOrg: false,
-      message: "No active organization selected in the current Clerk session",
-      userId,
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-    })
-    return
-  }
+// Public Chat / RAG widget routes: /api/chat/:botId
+app.use("/api/chat", chatRouter)
 
-  try {
-    const organization = await clerkClient.organizations.getOrganization({
-      organizationId: orgId,
-    })
+// Analytics & Conversations dashboard routes: /api/bots/:botId/conversations & /api/bots/:botId/stats
+app.use("/api/bots", analyticsRouter)
+app.use("/api/conversations", directConversationsRouter)
 
-    res.json({
-      hasActiveOrg: true,
-      message: "Active organization retrieved successfully",
-      userId,
-      orgId,
-      orgRole,
-      orgSlug,
-      orgPermissions: orgPermissions || [],
-      organization,
-    })
-  } catch (err) {
-    logger.error(err, "Failed to retrieve organization from Clerk")
-    res.status(500).json({ error: "Failed to retrieve organization details" })
-  }
-}
-
-app.get("/organization", handleOrganization)
-app.get("/api/organization", handleOrganization)
+// Worker Internal routes: /internal/documents/:docId/status
+app.use("/internal", internalRouter)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
@@ -199,7 +236,7 @@ app.use((_req: Request, res: Response) => {
   })
 })
 
-// Global error handling middleware
+// Global error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   logger.error(err, "[API Error]")
   res.status(500).json({
@@ -213,11 +250,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 // --- Server Lifecycle ---
 const server = app.listen(PORT, () => {
-  logger.info(`🚀 API Server running on http://localhost:${PORT}`)
+  logger.info(`🚀 Botly API Server running on http://localhost:${PORT}`)
   logger.info(`   Health check: http://localhost:${PORT}/api/health`)
+  logger.info(`   Widget script: http://localhost:${PORT}/widget.js`)
 })
 
-// Graceful shutdown
 const shutdown = (signal: string) => {
   logger.info(`Received ${signal}. Closing HTTP server gracefully...`)
   server.close(() => {
