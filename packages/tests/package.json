@@ -1,0 +1,22 @@
+{
+  "name": "@botly/tests",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@botly/ai": "workspace:*",
+    "@botly/inngest": "workspace:*",
+    "@botly/storage": "workspace:*",
+    "api": "workspace:*",
+    "db": "workspace:*",
+    "types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^5.7"
+  }
+}
