@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
+import { Routes, Route, useNavigate } from "react-router-dom"
 import { ClerkProvider } from "@clerk/react"
 import { dark } from "@clerk/themes"
 import { ThemeProvider, useTheme } from "@/components/theme-provider"
@@ -6,11 +6,12 @@ import { QueryProvider } from "@/providers/query-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { RootLayout } from "@/layouts/root-layout"
-import { DashboardPage } from "@/pages/dashboard-page"
+import { LandingPage } from "@/pages/landing-page"
 import { BotListPage } from "@/pages/bot-list-page"
 import { CreateBotPage } from "@/pages/create-bot-page"
 import { BotDetailPage } from "@/pages/bot-detail-page"
 import { SettingsPage } from "@/pages/settings-page"
+import { NotFoundPage } from "@/pages/not-found-page"
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -46,15 +47,19 @@ export function App() {
         <QueryProvider>
           <TooltipProvider>
             <Routes>
-              <Route path="/" element={<RootLayout />}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<DashboardPage />}>
-                  <Route index element={<BotListPage />} />
-                  <Route path="bots/new" element={<CreateBotPage />} />
-                  <Route path="bots/:id" element={<BotDetailPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                </Route>
+              {/* Standalone Landing Page */}
+              <Route path="/" element={<LandingPage />} />
+
+              {/* Authenticated Dashboard Workspace */}
+              <Route path="/dashboard" element={<RootLayout />}>
+                <Route index element={<BotListPage />} />
+                <Route path="bots/new" element={<CreateBotPage />} />
+                <Route path="bots/:id" element={<BotDetailPage />} />
+                <Route path="settings" element={<SettingsPage />} />
               </Route>
+
+              {/* 404 Catch-all */}
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
             <Toaster />
           </TooltipProvider>
