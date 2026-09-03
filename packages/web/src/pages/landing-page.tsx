@@ -11,6 +11,10 @@ import {
   Sparkles,
   Send,
   ArrowUpRight,
+  Bot,
+  Database,
+  MessageSquare,
+  Code2,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -41,7 +45,7 @@ export function LandingPage() {
   ])
   const [inputMessage, setInputMessage] = useState("")
 
-  const embedCode = `<script\n  src="https://yourdomain.com/widget.js"\n  data-bot-id="bot_zen_preview"\n  async\n></script>`
+  const embedCode = `<script\n  src="https://yourdomain.com/widget.js"\n  data-bot-id="bot_demo_preview"\n  async\n></script>`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode)
@@ -71,15 +75,15 @@ export function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-border/80 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <span className="kanji-seal size-7 text-xs select-none">
-              一期
-            </span>
+            <div className="bg-primary text-primary-foreground flex size-7 shrink-0 items-center justify-center rounded-md font-bold text-xs tracking-tight shadow-xs">
+              <Bot className="size-4" />
+            </div>
             <div className="flex flex-col">
               <span className="font-mincho text-base font-bold tracking-wider text-foreground">
                 Botly
               </span>
               <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-mono -mt-0.5">
-                一期一会
+                AI Knowledge Assistant
               </span>
             </div>
           </Link>
@@ -137,10 +141,10 @@ export function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 text-center space-y-6">
           {/* Subtitle Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1 text-xs text-muted-foreground shadow-2xs">
-            <span className="kanji-seal size-3.5 text-[9px] rounded-xs">会</span>
-            <span className="font-mincho">一期一会 — ICHIGO ICHIE</span>
+            <span className="size-1.5 rounded-full bg-primary" />
+            <span className="font-medium text-foreground">AI Customer Support</span>
             <span className="text-border">•</span>
-            <span>Quiet AI for Customer Support</span>
+            <span>Grounded Documentation Assistant</span>
           </div>
 
           {/* Main Headline */}
@@ -227,7 +231,7 @@ export function LandingPage() {
               Interactive Demonstration
             </Badge>
             <h2 className="font-mincho text-2xl sm:text-3xl font-bold text-foreground">
-              Experience the Zen Support Dialog
+              Experience the Assistant Dialog
             </h2>
             <p className="text-muted-foreground text-xs sm:text-sm max-w-xl mx-auto">
               Simulate visitor questions below or type your own. Test how grounded answers stream effortlessly.
@@ -238,9 +242,9 @@ export function LandingPage() {
             {/* Simulator Header */}
             <div className="flex items-center justify-between border-b border-border/80 bg-muted/40 px-4 py-2.5">
               <div className="flex items-center gap-2">
-                <span className="kanji-seal size-5 text-[10px] rounded-xs">
-                  和
-                </span>
+                <div className="size-5 rounded-md bg-primary text-primary-foreground flex items-center justify-center">
+                  <Bot className="size-3" />
+                </div>
                 <span className="text-xs font-semibold text-foreground font-mincho">
                   Support Assistant
                 </span>
@@ -261,8 +265,8 @@ export function LandingPage() {
                   }`}
                 >
                   {m.role === "bot" && (
-                    <div className="size-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-xs font-mincho">
-                      一
+                    <div className="size-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                      <Bot className="size-3.5" />
                     </div>
                   )}
                   <div
@@ -324,13 +328,13 @@ export function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-center space-y-2 mb-12">
             <Badge variant="outline" className="font-mono text-xs">
-              Core Philosophy
+              Architecture
             </Badge>
             <h2 className="font-mincho text-2xl sm:text-3xl font-bold text-foreground">
-              The Three Pillars of Zen Intelligence
+              The Three Pillars of Botly
             </h2>
             <p className="text-muted-foreground text-xs sm:text-sm max-w-xl mx-auto">
-              Botly is engineered for harmony, eliminating noise and hallucination through principled architecture.
+              Engineered for accuracy and clarity, eliminating noise and hallucination through principled retrieval.
             </p>
           </div>
 
@@ -338,13 +342,15 @@ export function LandingPage() {
             {/* Pillar 1 */}
             <div className="rounded-xl border border-border/80 bg-card p-6 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="kanji-seal size-8 text-sm">知</span>
+                <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <Database className="size-4" />
+                </div>
                 <span className="text-[10px] font-mono text-muted-foreground">
                   Pillar 01
                 </span>
               </div>
-              <h3 className="font-mincho text-lg font-bold text-foreground">
-                Chishiki (知識) — Grounded Knowledge
+              <h3 className="font-mincho text-base font-bold text-foreground">
+                Grounded Knowledge Ingestion
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Ingest PDF manuals, Markdown repositories, CSV tables, and public documentation URLs. Inngest background jobs split content into semantic chunks and store 1024-dimensional vectors.
@@ -354,13 +360,15 @@ export function LandingPage() {
             {/* Pillar 2 */}
             <div className="rounded-xl border border-border/80 bg-card p-6 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="kanji-seal size-8 text-sm">対</span>
+                <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <MessageSquare className="size-4" />
+                </div>
                 <span className="text-[10px] font-mono text-muted-foreground">
                   Pillar 02
                 </span>
               </div>
-              <h3 className="font-mincho text-lg font-bold text-foreground">
-                Taiwa (対話) — Truthful Dialogue
+              <h3 className="font-mincho text-base font-bold text-foreground">
+                Truthful Dialogue & Retrieval
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Queries trigger real-time semantic cosine similarity retrieval. The assistant reasons solely over retrieved passages, ensuring truthful answers without creative hallucinations.
@@ -370,13 +378,15 @@ export function LandingPage() {
             {/* Pillar 3 */}
             <div className="rounded-xl border border-border/80 bg-card p-6 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="kanji-seal size-8 text-sm">澄</span>
+                <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <Code2 className="size-4" />
+                </div>
                 <span className="text-[10px] font-mono text-muted-foreground">
                   Pillar 03
                 </span>
               </div>
-              <h3 className="font-mincho text-lg font-bold text-foreground">
-                Togisumashi (研ぎ澄まし) — Refined Embed
+              <h3 className="font-mincho text-base font-bold text-foreground">
+                Refined, Lightweight Embed
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 A single lightweight asynchronous script under 6KB. Encapsulated in native Shadow DOM so your host application's typography, CSS frameworks, and scripts remain unpolluted.
@@ -448,12 +458,14 @@ export function LandingPage() {
       <footer className="py-12 bg-card/60">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span className="kanji-seal size-5 text-[10px]">一期</span>
+            <div className="size-5 rounded bg-primary text-primary-foreground flex items-center justify-center">
+              <Bot className="size-3" />
+            </div>
             <span className="font-mincho font-bold text-foreground">
               Botly
             </span>
             <span className="text-border">•</span>
-            <span>一期一会 — Every encounter is treasured.</span>
+            <span>Autonomous AI Customer Support grounded on your knowledge base.</span>
           </div>
 
           <div className="flex items-center gap-4">
