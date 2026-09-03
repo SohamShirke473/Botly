@@ -14,11 +14,13 @@
   },
   "dependencies": {
     "@ai-sdk/mistral": "^4.0.37",
+    "@mendable/firecrawl-js": "^4.38.0",
     "ai": "^7.0.87",
+    "firecrawl": "^4.38.0",
     "unpdf": "^1.8.1"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
-    "typescript": "^7.0.2"
+    "typescript": "^5.7"
   }
 }

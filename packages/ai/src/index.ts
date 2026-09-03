@@ -17,3 +17,6 @@ export type { ChunkOptions, TextChunk } from "./chunk"
 
 export { parsePdf } from "./parse-pdf"
 export type { ParsedPdfResult, ParsedPdfPage } from "./parse-pdf"
+
+export { scrapeUrl } from "./scrape"
+export type { ScrapedContent, ScrapeOptions } from "./scrape"

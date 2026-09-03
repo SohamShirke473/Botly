@@ -4,7 +4,7 @@ import { db } from "db"
 import { documents, chunks } from "db/schema"
 import { eq } from "drizzle-orm"
 import { getFile } from "@botly/storage"
-import { parsePdf, chunkText, embedManyTexts } from "@botly/ai"
+import { parsePdf, chunkText, embedManyTexts, scrapeUrl } from "@botly/ai"
 
 /**
  * Checks whether an IP address belongs to private, loopback, or link-local ranges.
@@ -83,25 +83,6 @@ export async function validatePublicUrl(urlString: string): Promise<URL> {
   return url
 }
 
-/**
- * Strips HTML elements, styles, scripts, comments, and decodes HTML entities.
- */
-function stripHtml(html: string): string {
-  let text = html.replace(/<!--[\s\S]*?-->/g, " ")
-  text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
-  text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
-  text = text.replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, " ")
-  text = text.replace(/<[^>]+>/g, " ")
-  text = text
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&#x27;/gi, "'")
-  return text.replace(/\s+/g, " ").trim()
-}
 
 /**
  * Core document processing logic:
@@ -143,21 +124,11 @@ export async function processDocument(docId: string): Promise<{
       const fileData = await getFile(doc.storageKey)
       rawText = new TextDecoder().decode(fileData.data)
     } else if (doc.sourceType === "url") {
-      // Validate URL against SSRF before making outbound HTTP request
+      // Validate URL against SSRF before making outbound request
       const safeUrl = await validatePublicUrl(doc.filename)
 
-      const response = await fetch(safeUrl.toString(), {
-        headers: {
-          "User-Agent": "Botly-Crawler/1.0",
-        },
-      })
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch URL ${doc.filename}: ${response.status} ${response.statusText}`
-        )
-      }
-      const html = await response.text()
-      rawText = stripHtml(html)
+      const scraped = await scrapeUrl(safeUrl.toString())
+      rawText = scraped.markdown
     }
 
     if (!rawText.trim()) {
