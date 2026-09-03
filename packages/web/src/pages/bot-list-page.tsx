@@ -16,6 +16,26 @@ import {
   Search,
   Layers,
 } from "lucide-react"
+import { motion } from "motion/react"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.03, // physics-no-excessive-stagger (< 50ms)
+    },
+  },
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.18, ease: "easeOut" as const }, // timing-under-300ms, easing-entrance-ease-out
+  },
+}
 
 function BotCardSkeleton() {
   return (
@@ -186,43 +206,53 @@ export function BotListPage() {
 
           {/* Bot Cards Grid */}
           {filteredBots.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredBots.map((bot, i) => (
-                <Link
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {filteredBots.map((bot) => (
+                <motion.div
                   key={bot.id}
-                  to={`/dashboard/bots/${bot.id}`}
-                  className="group block"
-                  style={{ animationDelay: `${i * 60}ms` }}
+                  variants={cardVariants}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
                 >
-                  <Card className="h-full border-border/80 transition-all duration-150 hover:border-foreground/30 hover:shadow-xs group-active:scale-[0.99] flex flex-col justify-between">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="bg-primary/5 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-primary/10 transition-colors group-hover:bg-primary/10">
-                            <Bot className="size-5" />
+                  <Link
+                    to={`/dashboard/bots/${bot.id}`}
+                    className="group block h-full"
+                  >
+                    <Card className="h-full border-border/80 transition-colors duration-150 hover:border-foreground/30 hover:shadow-xs flex flex-col justify-between">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="bg-primary/5 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-primary/10 transition-colors group-hover:bg-primary/10">
+                              <Bot className="size-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <CardTitle className="text-sm font-semibold truncate group-hover:text-foreground transition-colors">
+                                {bot.name}
+                              </CardTitle>
+                              <p className="text-muted-foreground/80 font-mono text-[11px] truncate mt-0.5">
+                                {bot.id}
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <CardTitle className="text-sm font-semibold truncate group-hover:text-foreground transition-colors">
-                              {bot.name}
-                            </CardTitle>
-                            <p className="text-muted-foreground/80 font-mono text-[11px] truncate mt-0.5">
-                              {bot.id}
-                            </p>
-                          </div>
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-medium bg-status-ready/10 text-status-ready shrink-0 gap-1.5"
+                          >
+                            <span className="size-1.5 rounded-full bg-status-ready animate-pulse" />
+                            Active
+                          </Badge>
                         </div>
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] font-medium bg-status-ready/10 text-status-ready shrink-0 gap-1.5"
-                        >
-                          <span className="size-1.5 rounded-full bg-status-ready animate-pulse" />
-                          Active
-                        </Badge>
-                      </div>
-                    </CardHeader>
+                      </CardHeader>
 
-                    <CardContent className="pt-0">
-                      <div className="border-t border-border/60 pt-3 flex items-center justify-between text-muted-foreground text-xs">
-                        <div className="flex items-center gap-2">
+                      <CardContent className="pt-0">
+                        <div className="border-t border-border/60 pt-3 flex items-center justify-between text-muted-foreground text-xs">
+                          <div className="flex items-center gap-2">
                           <span className="flex items-center gap-1 text-[11px]">
                             <FileText className="size-3 text-muted-foreground/70" />
                             {bot.system_prompt
@@ -237,10 +267,11 @@ export function BotListPage() {
                         <ArrowRight className="size-3 text-muted-foreground opacity-0 -translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0" />
                       </div>
                     </CardContent>
-                  </Card>
-                </Link>
+                    </Card>
+                  </Link>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
 
           {/* Error State */}
