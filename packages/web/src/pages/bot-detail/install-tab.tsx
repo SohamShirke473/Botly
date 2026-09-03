@@ -5,7 +5,7 @@ import { DEFAULT_WIDGET_CONFIG } from "types"
 import type { Bot } from "types"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { Copy, Check } from "lucide-react"
+import { Copy, Check, Terminal, CheckCircle2, ShieldCheck } from "lucide-react"
 
 export function InstallTab({ bot }: { bot: Bot }) {
   const [copied, setCopied] = useState(false)
@@ -17,66 +17,99 @@ export function InstallTab({ bot }: { bot: Bot }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(snippet)
     setCopied(true)
-    toast.success("Copied to clipboard")
+    toast.success("Embed snippet copied to clipboard")
     setTimeout(() => setCopied(false), 2000)
   }
 
   const config = bot.widget_config || DEFAULT_WIDGET_CONFIG
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {/* Code Snippet */}
-      <div className="space-y-3">
-        <div>
-          <h3 className="text-sm font-semibold">Embed Script</h3>
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            Add this snippet to your website's HTML, just before the closing
-            <code className="bg-muted mx-0.5 rounded px-1 py-0.5 font-mono text-[11px]">
-              &lt;/body&gt;
-            </code>
-            tag.
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+      {/* Code Snippet & Instructions */}
+      <div className="lg:col-span-7 space-y-5">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold text-foreground">
+            Embed Script on Your Site
+          </h3>
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            Copy and paste this script tag into your website HTML right before the
+            closing <code className="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">&lt;/body&gt;</code> tag.
           </p>
         </div>
 
-        <div className="group relative">
-          <pre className="overflow-x-auto rounded-xl border bg-zinc-900 p-4 font-mono text-xs leading-relaxed text-zinc-100 dark:bg-zinc-950">
+        {/* Code Snippet Box */}
+        <div className="rounded-xl border border-border/80 bg-zinc-950 text-zinc-100 overflow-hidden shadow-xs">
+          <div className="flex items-center justify-between px-3.5 py-2 border-b border-zinc-800 bg-zinc-900/70">
+            <div className="flex items-center gap-2">
+              <Terminal className="size-3.5 text-zinc-400" />
+              <span className="font-mono text-xs text-zinc-300">index.html</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={handleCopy}
+              className="gap-1.5 text-zinc-300 hover:text-white hover:bg-zinc-800 h-6.5 text-[11px]"
+            >
+              {copied ? (
+                <>
+                  <Check className="text-status-ready size-3" />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="size-3" />
+                  <span>Copy Code</span>
+                </>
+              )}
+            </Button>
+          </div>
+          <pre className="p-4 font-mono text-xs leading-relaxed overflow-x-auto text-zinc-200">
             {snippet}
           </pre>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={handleCopy}
-            className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            {copied ? (
-              <Check className="text-status-ready size-3.5" />
-            ) : (
-              <Copy className="size-3.5" />
-            )}
-          </Button>
         </div>
 
-        <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-muted-foreground text-[11px]">
-            <strong className="text-foreground">Bot ID:</strong>{" "}
-            <code className="font-mono">{bot.id}</code>
-          </p>
+        {/* Step-by-step Installation Checklist */}
+        <div className="rounded-xl border border-border/80 bg-card p-4 space-y-3 shadow-xs">
+          <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            Quick Verification Steps
+          </h4>
+          <ul className="space-y-2.5 text-xs text-muted-foreground">
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 className="size-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-foreground font-medium">1. Paste into your HTML</strong>
+                <p className="text-[11px] mt-0.5">
+                  Insert before the closing <code className="font-mono bg-muted px-1 rounded">&lt;/body&gt;</code> tag on any page you want the chatbot active.
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 className="size-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-foreground font-medium">2. Asynchronous and lightweight</strong>
+                <p className="text-[11px] mt-0.5">
+                  The script loads asynchronously without blocking page rendering or layout performance.
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <ShieldCheck className="size-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-foreground font-medium">3. Monitor live transcripts</strong>
+                <p className="text-[11px] mt-0.5">
+                  Once visitors interact with the widget, inspect full chat transcripts on the Conversations tab.
+                </p>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
 
-      {/* Live Preview */}
-      <div className="space-y-3">
-        <div>
-          <h3 className="text-sm font-semibold">Live Preview</h3>
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            This preview reads the same{" "}
-            <code className="bg-muted rounded px-1 py-0.5 font-mono text-[11px]">
-              widget_config
-            </code>{" "}
-            JSON as the real widget — what you see here is exactly what visitors
-            will see.
-          </p>
-        </div>
+      {/* Live Preview Simulator */}
+      <div className="lg:col-span-5 space-y-2 lg:sticky lg:top-16">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Live Embed Preview
+        </span>
         <WidgetPreview config={config} />
       </div>
     </div>

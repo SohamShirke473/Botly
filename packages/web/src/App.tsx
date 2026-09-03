@@ -11,6 +11,8 @@ import { BotListPage } from "@/pages/bot-list-page"
 import { CreateBotPage } from "@/pages/create-bot-page"
 import { BotDetailPage } from "@/pages/bot-detail-page"
 import { SettingsPage } from "@/pages/settings-page"
+import { OrganizationPage } from "@/pages/organization-page"
+import { NotFoundPage } from "@/pages/not-found-page"
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -52,8 +54,10 @@ export function App() {
                   <Route index element={<BotListPage />} />
                   <Route path="bots/new" element={<CreateBotPage />} />
                   <Route path="bots/:id" element={<BotDetailPage />} />
+                  <Route path="organization" element={<OrganizationPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                 </Route>
+                <Route path="*" element={<NotFoundPage />} />
               </Route>
             </Routes>
             <Toaster />

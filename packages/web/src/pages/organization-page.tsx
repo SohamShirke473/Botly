@@ -42,7 +42,7 @@ export function OrganizationPage() {
   const orgApiQuery = useOrganizationApiQuery()
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       {/* Signed-Out State */}
       <Show when="signed-out">
         <Card className="mx-auto max-w-md text-center">

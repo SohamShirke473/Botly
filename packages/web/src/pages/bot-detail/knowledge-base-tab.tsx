@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import {
   useDocumentsQuery,
   useUploadDocumentMutation,
@@ -29,29 +29,44 @@ import {
   Database,
   ExternalLink,
   RotateCw,
+  Globe,
+  FileCode,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
 } from "lucide-react"
 
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; className: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   ready: {
     label: "Ready",
-    className:
-      "bg-status-ready/15 text-status-ready border-status-ready/20",
+    className: "bg-status-ready/10 text-status-ready border-status-ready/20",
+    icon: CheckCircle2,
   },
   processing: {
     label: "Processing",
-    className:
-      "bg-status-processing/15 text-status-processing border-status-processing/20",
+    className: "bg-status-processing/10 text-status-processing border-status-processing/20",
+    icon: Loader2,
   },
   pending: {
     label: "Pending",
-    className:
-      "bg-status-pending/15 text-status-pending border-status-pending/20",
+    className: "bg-status-pending/10 text-status-pending border-status-pending/20",
+    icon: Clock,
   },
   failed: {
     label: "Failed",
-    className:
-      "bg-status-failed/15 text-status-failed border-status-failed/20",
+    className: "bg-status-failed/10 text-status-failed border-status-failed/20",
+    icon: AlertCircle,
   },
+}
+
+function getDocumentIcon(sourceType: string, filename: string) {
+  if (sourceType === "url") return <Globe className="size-3.5 text-blue-500" />
+  if (filename.endsWith(".json") || filename.endsWith(".csv"))
+    return <FileCode className="size-3.5 text-emerald-500" />
+  return <FileText className="size-3.5 text-muted-foreground" />
 }
 
 export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
@@ -82,6 +97,17 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
     }
   }, [docsQuery])
 
+  const stats = useMemo(() => {
+    if (!docsQuery.data) return { total: 0, ready: 0, processing: 0 }
+    return {
+      total: docsQuery.data.length,
+      ready: docsQuery.data.filter((d) => d.status === "ready").length,
+      processing: docsQuery.data.filter(
+        (d) => d.status === "processing" || d.status === "pending"
+      ).length,
+    }
+  }, [docsQuery.data])
+
   const handleUpload = useCallback(
     (file: File) => {
       setUploadProgress(0)
@@ -93,7 +119,7 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
           }
           return p + 10
         })
-      }, 200)
+      }, 150)
 
       uploadMutation.mutate(
         { botId: bot.id, file },
@@ -101,9 +127,9 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
           onSuccess: () => {
             clearInterval(interval)
             setUploadProgress(100)
-            setTimeout(() => setUploadProgress(0), 500)
+            setTimeout(() => setUploadProgress(0), 400)
             toast.success("Document uploaded", {
-              description: `"${file.name}" is being processed.`,
+              description: `"${file.name}" is queued for chunking and vector indexing.`,
             })
           },
           onError: (err) => {
@@ -132,8 +158,8 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
       { botId: bot.id, documentId: doc.id },
       {
         onSuccess: () => {
-          toast.success("Document deleted", {
-            description: `"${doc.filename}" has been removed.`,
+          toast.success("Document removed", {
+            description: `"${doc.filename}" and its vector embeddings have been deleted.`,
           })
         },
         onError: (err) => {
@@ -143,204 +169,297 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
     )
   }
 
+  const handleUrlSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    const url = urlInput.trim()
+    if (!url) return
+    submitUrlMutation.mutate(
+      { botId: bot.id, url },
+      {
+        onSuccess: () => {
+          toast.success("URL submitted", {
+            description: `"${url}" will be crawled and indexed.`,
+          })
+          setUrlInput("")
+        },
+        onError: (err) => {
+          toast.error("Failed to add URL", { description: err.message })
+        },
+      }
+    )
+  }
+
   return (
-    <div className="space-y-4">
-      {/* Upload Zone */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragOver(true)
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-        className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
-          dragOver
-            ? "border-primary bg-primary/5"
-            : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
-        }`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          accept=".pdf,.txt,.md,.csv,.json"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) handleUpload(file)
-            e.target.value = ""
-          }}
-        />
-        <Upload
-          className={`mx-auto mb-2 size-5 ${
-            dragOver ? "text-primary" : "text-muted-foreground"
-          }`}
-        />
-        <p className="text-sm font-medium">
-          {dragOver ? "Drop to upload" : "Upload documents"}
-        </p>
-        <p className="text-muted-foreground mt-1 text-xs">
-          Drag & drop or click to browse. PDF, TXT, MD, CSV, JSON.
-        </p>
-      </div>
-
-      {uploadProgress > 0 && uploadProgress < 100 && (
-        <Progress value={uploadProgress} className="h-1.5" />
-      )}
-
-      {/* URL Input */}
-      <div className="flex gap-2">
-        <Input
-          placeholder="Or paste a URL to scrape..."
-          value={urlInput}
-          onChange={(e) => setUrlInput(e.target.value)}
-          className="h-8 flex-1 text-sm"
-        />
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={!urlInput.trim() || submitUrlMutation.isPending}
-          onClick={() => {
-            const url = urlInput.trim()
-            if (!url) return
-            submitUrlMutation.mutate(
-              { botId: bot.id, url },
-              {
-                onSuccess: () => {
-                  toast.success("URL submitted", {
-                    description: `"${url}" is queued for ingestion.`,
-                  })
-                  setUrlInput("")
-                },
-                onError: (err) => {
-                  toast.error("Failed to add URL", { description: err.message })
-                },
-              }
-            )
-          }}
-          className="gap-1.5"
-        >
-          {submitUrlMutation.isPending ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <ExternalLink className="size-3.5" />
-          )}
-          Add URL
-        </Button>
-      </div>
-
-      {/* Documents Table */}
-      {docsQuery.isLoading ? (
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-lg" />
-          ))}
+    <div className="space-y-5">
+      {/* Unified Ingestion Container */}
+      <div className="rounded-xl border border-border/80 bg-card p-4 space-y-4 shadow-xs">
+        <div>
+          <h3 className="text-xs font-semibold text-foreground tracking-wide uppercase">
+            Ingest Knowledge Sources
+          </h3>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            Upload product manuals, markdown guides, spreadsheets, or crawl public documentation URLs.
+          </p>
         </div>
-      ) : docsQuery.data && docsQuery.data.length > 0 ? (
-        <div className="rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs">File</TableHead>
-                <TableHead className="text-xs">Status</TableHead>
-                <TableHead className="text-xs">Chunks</TableHead>
-                <TableHead className="text-xs">Type</TableHead>
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {docsQuery.data.map((doc, i) => {
-                const status =
-                  STATUS_CONFIG[doc.status] || STATUS_CONFIG.pending
-                return (
-                  <TableRow
-                    key={doc.id}
-                    style={{ animationDelay: `${i * 80}ms` }}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <FileText className="text-muted-foreground size-3.5" />
-                        <span className="text-xs font-medium">
-                          {doc.filename}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* File Drag & Drop */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragOver(true)
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`cursor-pointer rounded-lg border border-dashed p-5 text-center transition-all ${
+              dragOver
+                ? "border-foreground bg-accent/40"
+                : "border-border/90 hover:border-foreground/40 hover:bg-muted/30"
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.txt,.md,.csv,.json"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleUpload(file)
+                e.target.value = ""
+              }}
+            />
+            <Upload
+              className={`mx-auto mb-2 size-4.5 ${
+                dragOver ? "text-foreground" : "text-muted-foreground"
+              }`}
+            />
+            <p className="text-xs font-medium text-foreground">
+              {dragOver ? "Drop to upload" : "Drop files or click to browse"}
+            </p>
+            <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap">
+              {["PDF", "TXT", "MD", "CSV", "JSON"].map((ext) => (
+                <span
+                  key={ext}
+                  className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                >
+                  {ext}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* URL Scraper Input */}
+          <div className="rounded-lg border border-border/80 bg-muted/20 p-4 flex flex-col justify-between">
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Globe className="size-3.5 text-muted-foreground" />
+                Crawl Website Documentation
+              </span>
+              <p className="text-muted-foreground text-[11px] leading-relaxed">
+                Provide a public webpage URL. Botly will extract text and index vector embeddings.
+              </p>
+            </div>
+            <form onSubmit={handleUrlSubmit} className="flex gap-2 mt-3">
+              <Input
+                placeholder="https://docs.yourcompany.com/overview"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                className="h-8 text-xs bg-background flex-1 font-mono text-[12px]"
+              />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                disabled={!urlInput.trim() || submitUrlMutation.isPending}
+                className="gap-1.5 shrink-0"
+              >
+                {submitUrlMutation.isPending ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <ExternalLink className="size-3" />
+                )}
+                <span>Add URL</span>
+              </Button>
+            </form>
+          </div>
+        </div>
+
+        {uploadProgress > 0 && uploadProgress < 100 && (
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+              <span>Uploading document...</span>
+              <span>{uploadProgress}%</span>
+            </div>
+            <Progress value={uploadProgress} className="h-1" />
+          </div>
+        )}
+      </div>
+
+      {/* Documents Summary & Table */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              Indexed Documents
+            </h4>
+            <Badge variant="outline" className="font-mono text-[11px]">
+              {stats.total} total
+            </Badge>
+          </div>
+          {stats.total > 0 && (
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="size-1.5 rounded-full bg-status-ready" />
+                {stats.ready} ready
+              </span>
+              {stats.processing > 0 && (
+                <span className="flex items-center gap-1 text-status-processing">
+                  <Loader2 className="size-2.5 animate-spin" />
+                  {stats.processing} processing
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {docsQuery.isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : docsQuery.data && docsQuery.data.length > 0 ? (
+          <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
+            <Table>
+              <TableHeader className="bg-muted/30">
+                <TableRow>
+                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                    Document
+                  </TableHead>
+                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                    Chunks
+                  </TableHead>
+                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                    Source
+                  </TableHead>
+                  <TableHead className="w-16" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {docsQuery.data.map((doc, i) => {
+                  const status =
+                    STATUS_CONFIG[doc.status] || STATUS_CONFIG.pending
+                  const StatusIcon = status.icon
+
+                  return (
+                    <TableRow
+                      key={doc.id}
+                      style={{ animationDelay: `${i * 40}ms` }}
+                      className="transition-colors hover:bg-muted/30"
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-2.5">
+                          {getDocumentIcon(doc.source_type, doc.filename)}
+                          <span className="text-xs font-medium text-foreground max-w-sm truncate">
+                            {doc.filename}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={`text-[10px] font-medium gap-1 ${status.className}`}
+                        >
+                          <StatusIcon
+                            className={`size-2.5 ${
+                              doc.status === "processing" ||
+                              doc.status === "pending"
+                                ? "animate-spin"
+                                : ""
+                            }`}
+                          />
+                          <span>{status.label}</span>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-muted-foreground font-mono text-xs">
+                          {doc.chunk_count !== undefined &&
+                          doc.chunk_count !== null
+                            ? doc.chunk_count
+                            : "—"}
                         </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={`text-[10px] font-medium ${status.className}`}
-                      >
-                        {(doc.status === "processing" ||
-                          doc.status === "pending") && (
-                          <Loader2 className="mr-1 size-2.5 animate-spin" />
-                        )}
-                        {status.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground font-mono text-xs">
-                        {doc.chunk_count ?? "—"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-[10px]">
-                        {doc.source_type.toUpperCase()}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {doc.status === "failed" && (
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="font-mono text-[10px] text-muted-foreground"
+                        >
+                          {doc.source_type.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-1">
+                          {doc.status === "failed" && (
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              onClick={() =>
+                                reprocessMutation.mutate(
+                                  { botId: bot.id, documentId: doc.id },
+                                  {
+                                    onSuccess: () =>
+                                      toast.success("Reprocessing queued", {
+                                        description: `"${doc.filename}" is being re-indexed.`,
+                                      }),
+                                    onError: (err) =>
+                                      toast.error("Reprocess failed", {
+                                        description: err.message,
+                                      }),
+                                  }
+                                )
+                              }
+                              disabled={reprocessMutation.isPending}
+                              className="text-muted-foreground hover:text-foreground"
+                              title="Retry ingestion"
+                            >
+                              <RotateCw className="size-3" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon-xs"
-                            onClick={() =>
-                              reprocessMutation.mutate(
-                                { botId: bot.id, documentId: doc.id },
-                                {
-                                  onSuccess: () =>
-                                    toast.success("Reprocessing started", {
-                                      description: `"${doc.filename}" is being re-indexed.`,
-                                    }),
-                                  onError: (err) =>
-                                    toast.error("Reprocess failed", {
-                                      description: err.message,
-                                    }),
-                                }
-                              )
-                            }
-                            disabled={reprocessMutation.isPending}
-                            className="text-muted-foreground hover:text-foreground"
-                            title="Retry ingestion"
+                            onClick={() => handleDelete(doc)}
+                            disabled={deleteMutation.isPending}
+                            className="text-muted-foreground hover:text-destructive"
+                            title="Delete document"
                           >
-                            <RotateCw className="size-3" />
+                            <Trash2 className="size-3" />
                           </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => handleDelete(doc)}
-                          disabled={deleteMutation.isPending}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="size-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-dashed py-12 text-center">
-          <Database className="text-muted-foreground/50 mx-auto mb-2 size-5" />
-          <p className="text-sm font-medium">No documents yet</p>
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            Upload files or add URLs to build your knowledge base.
-          </p>
-        </div>
-      )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed bg-card/40 py-12 text-center">
+            <Database className="text-muted-foreground/40 mx-auto mb-2 size-5" />
+            <p className="text-xs font-semibold text-foreground">
+              No documents indexed yet
+            </p>
+            <p className="text-muted-foreground mt-0.5 text-[11px]">
+              Drag and drop files or add a URL above to build your bot's knowledge
+              base.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
