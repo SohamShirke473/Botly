@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import {
   Card,
   CardContent,
@@ -7,10 +6,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { useAuth } from "@clerk/react"
 import { Show } from "@clerk/react"
-import { Building2, Shield, CreditCard, Palette, ArrowRight } from "lucide-react"
+import { Building2, Shield, CreditCard, Palette } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export function SettingsPage() {
@@ -31,26 +29,18 @@ export function SettingsPage() {
         {/* Organization Section */}
         <Card className="border-border/80 shadow-xs">
           <CardHeader className="pb-3 border-b border-border/60">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="bg-primary/5 text-primary flex size-8 items-center justify-center rounded-lg ring-1 ring-primary/10">
-                  <Building2 className="size-4" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm font-semibold text-foreground">
-                    Active Organization
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Your current multi-tenant team and role context.
-                  </CardDescription>
-                </div>
+            <div className="flex items-center gap-2.5">
+              <div className="bg-primary/5 text-primary flex size-8 items-center justify-center rounded-lg ring-1 ring-primary/10">
+                <Building2 className="size-4" />
               </div>
-              <Link to="/dashboard/organization">
-                <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                  <span>Manage Org</span>
-                  <ArrowRight className="size-3" />
-                </Button>
-              </Link>
+              <div>
+                <CardTitle className="text-sm font-semibold text-foreground">
+                  Active Organization
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Your current multi-tenant team and role context.
+                </CardDescription>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="pt-4">

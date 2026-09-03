@@ -21,7 +21,6 @@ import {
   MessageSquareText,
   Settings,
   Plus,
-  Building2,
   ChevronRight,
 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -40,11 +39,8 @@ export function RootLayout() {
     if (pathname.startsWith("/dashboard/bots/")) {
       return [{ label: "Bots", href: "/dashboard" }, { label: "Bot Detail" }]
     }
-    if (pathname === "/dashboard/organization") {
-      return [{ label: "Workspace" }, { label: "Organization" }]
-    }
     if (pathname === "/dashboard/settings") {
-      return [{ label: "Workspace" }, { label: "Settings" }]
+      return [{ label: "Settings" }]
     }
     return [{ label: "Dashboard", href: "/dashboard" }]
   }
@@ -122,40 +118,22 @@ export function RootLayout() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-
-          {/* Workspace Section */}
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-muted-foreground/80 text-[11px] font-medium tracking-wider uppercase">
-              Workspace
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={<NavLink to="/dashboard/organization" />}
-                    tooltip="Organization"
-                  >
-                    <Building2 className="size-4" />
-                    <span>Organization</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={<NavLink to="/dashboard/settings" />}
-                    tooltip="Settings"
-                  >
-                    <Settings className="size-4" />
-                    <span>Settings</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
         </SidebarContent>
 
         <SidebarSeparator />
 
-        <SidebarFooter className="p-2 group-data-[collapsible=icon]:p-1">
+        <SidebarFooter className="p-2 space-y-1">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                render={<NavLink to="/dashboard/settings" />}
+                tooltip="Settings"
+              >
+                <Settings className="size-4" />
+                <span>Settings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
           <div className="flex items-center justify-between px-2 py-1 group-data-[collapsible=icon]:justify-center">
             <span className="text-[11px] text-muted-foreground font-mono group-data-[collapsible=icon]:hidden">
               v1.0.0
