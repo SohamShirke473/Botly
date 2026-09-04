@@ -1,10 +1,28 @@
 import { useState } from "react"
-import { useConversationsQuery, useMessagesQuery } from "@/hooks/use-api"
+import {
+  useConversationsQuery,
+  useMessagesQuery,
+  useTakeoverMutation,
+  useAgentReplyMutation,
+  useResolveMutation,
+  useReleaseMutation,
+} from "@/hooks/use-api"
+import { useRealtimeInbox } from "@/hooks/use-realtime"
 import type { Bot } from "types"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MessageSquareText, Bot as BotIcon, User, Copy, Check } from "lucide-react"
+import {
+  MessageSquareText,
+  Bot as BotIcon,
+  User,
+  Copy,
+  Check,
+  Send,
+  Hand,
+  CheckCheck,
+  Undo2,
+} from "lucide-react"
 import { renderMarkdown } from "@/lib/markdown"
 import { toast } from "sonner"
 
@@ -71,10 +89,29 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
   const convosQuery = useConversationsQuery(bot.id)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null)
+  const [draft, setDraft] = useState("")
   const activeId = selectedId ?? convosQuery.data?.[0]?.id ?? null
   const messagesQuery = useMessagesQuery(activeId ?? undefined)
+  const { connected, typingFrom, sendTyping } = useRealtimeInbox(bot.id, activeId)
+  const takeover = useTakeoverMutation()
+  const reply = useAgentReplyMutation()
+  const resolve = useResolveMutation()
+  const release = useReleaseMutation()
 
   const activeConvo = convosQuery.data?.find((c) => c.id === activeId)
+  const status = activeConvo?.status ?? "bot"
+
+  const sendReply = () => {
+    const content = draft.trim()
+    if (!content || !activeId || reply.isPending) return
+    reply.mutate(
+      { botId: bot.id, convoId: activeId, content },
+      {
+        onSuccess: () => setDraft(""),
+        onError: (e) => toast.error(e.message),
+      }
+    )
+  }
 
   const copyMessage = (id: string, text: string) => {
     navigator.clipboard.writeText(text)
@@ -118,7 +155,19 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs font-semibold text-foreground truncate">
+                      <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground truncate">
+                        <span
+                          title={convo.status ?? "bot"}
+                          className={`size-1.5 shrink-0 rounded-full ${
+                            convo.status === "queued"
+                              ? "bg-red-500"
+                              : convo.status === "human"
+                                ? "bg-emerald-500"
+                                : convo.status === "resolved"
+                                  ? "bg-muted-foreground"
+                                  : "bg-sky-500"
+                          }`}
+                        />
                         {formatVisitorName(convo.visitor_id)}
                       </span>
                       <span className="font-mono text-[10px] text-muted-foreground/70 shrink-0">
@@ -168,10 +217,67 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                 <span className="font-mono text-[11px] text-muted-foreground">
                   {activeConvo?.visitor_id}
                 </span>
+                <Badge
+                  variant={status === "bot" ? "secondary" : status === "queued" ? "destructive" : status === "human" ? "default" : "outline"}
+                  className="text-[10px] font-mono capitalize"
+                >
+                  {status}
+                </Badge>
+                <span
+                  title={connected ? "Live" : "Reconnecting"}
+                  className={`size-1.5 rounded-full ${connected ? "bg-emerald-500" : "bg-amber-500"}`}
+                />
               </div>
-              <Badge variant="secondary" className="text-[10px] font-mono">
-                {messagesQuery.data?.length ?? 0} messages
-              </Badge>
+              <div className="flex items-center gap-1.5">
+                {(status === "bot" || status === "queued" || status === "resolved") && activeId && (
+                  <button
+                    type="button"
+                    disabled={takeover.isPending}
+                    onClick={() =>
+                      takeover.mutate(
+                        { botId: bot.id, convoId: activeId },
+                        { onError: (e) => toast.error(e.message) }
+                      )
+                    }
+                    className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium hover:bg-muted cursor-pointer disabled:opacity-50"
+                  >
+                    <Hand className="size-3" /> Take over
+                  </button>
+                )}
+                {status === "human" && activeId && (
+                  <>
+                    <button
+                      type="button"
+                      disabled={resolve.isPending}
+                      onClick={() =>
+                        resolve.mutate(
+                          { botId: bot.id, convoId: activeId },
+                          { onError: (e) => toast.error(e.message) }
+                        )
+                      }
+                      className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium hover:bg-muted cursor-pointer disabled:opacity-50"
+                    >
+                      <CheckCheck className="size-3" /> Resolve
+                    </button>
+                    <button
+                      type="button"
+                      disabled={release.isPending}
+                      onClick={() =>
+                        release.mutate(
+                          { botId: bot.id, convoId: activeId },
+                          { onError: (e) => toast.error(e.message) }
+                        )
+                      }
+                      className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium hover:bg-muted cursor-pointer disabled:opacity-50"
+                    >
+                      <Undo2 className="size-3" /> To bot
+                    </button>
+                  </>
+                )}
+                <Badge variant="secondary" className="text-[10px] font-mono">
+                  {messagesQuery.data?.length ?? 0} messages
+                </Badge>
+              </div>
             </div>
 
             <ScrollArea className="min-h-0 flex-1 p-4">
@@ -185,6 +291,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                 ) : messagesQuery.data && messagesQuery.data.length > 0 ? (
                   messagesQuery.data.map((msg) => {
                     const isUser = msg.role === "user"
+                    const isAgent = msg.role === "agent"
                     return (
                       <div
                         key={msg.id}
@@ -193,11 +300,27 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                         }`}
                       >
                         {!isUser && (
-                          <div className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-lg mt-0.5">
-                            <BotIcon className="size-3.5" />
+                          <div
+                            className={`flex size-7 shrink-0 items-center justify-center rounded-lg mt-0.5 ${
+                              isAgent
+                                ? "bg-emerald-500/15 text-emerald-600"
+                                : "bg-primary/10 text-primary"
+                            }`}
+                            title={isAgent ? "Human agent" : msg.role}
+                          >
+                            {isAgent ? (
+                              <Hand className="size-3.5" />
+                            ) : (
+                              <BotIcon className="size-3.5" />
+                            )}
                           </div>
                         )}
                         <div className="group relative max-w-[76%] space-y-1">
+                          {isAgent && (
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
+                              Agent
+                            </p>
+                          )}
                           <div
                             className={`rounded-xl px-3.5 py-2.5 text-xs shadow-2xs ${
                               isUser
@@ -252,6 +375,49 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                 )}
               </div>
             </ScrollArea>
+
+            {typingFrom && (
+              <p className="px-4 py-1 text-[11px] text-muted-foreground italic">
+                Agent is typing…
+              </p>
+            )}
+
+            {/* Agent composer — only enabled once taken over */}
+            <div className="border-t border-border/80 bg-card/60 px-4 py-3">
+              {status === "human" && activeId ? (
+                <form
+                  className="flex items-center gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    sendReply()
+                  }}
+                >
+                  <input
+                    value={draft}
+                    onChange={(e) => {
+                      setDraft(e.target.value)
+                      if (activeId) sendTyping(activeId)
+                    }}
+                    placeholder="Reply as agent…"
+                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-ring"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!draft.trim() || reply.isPending}
+                    className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50 cursor-pointer"
+                    title="Send reply"
+                  >
+                    <Send className="size-3.5" />
+                  </button>
+                </form>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">
+                  {status === "queued"
+                    ? "Visitor is waiting — take over to reply live."
+                    : "Take over this conversation to reply as a human agent."}
+                </p>
+              )}
+            </div>
           </>
         ) : (
           <div className="flex flex-1 items-center justify-center p-6 text-center">

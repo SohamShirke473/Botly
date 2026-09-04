@@ -366,6 +366,72 @@ export function useBotStatsQuery(botId: string | undefined) {
   })
 }
 
+// ─── Human-in-the-Loop Agent Hooks ──────────────────────────────────
+
+function useAgentActionMutation(action: "takeover" | "resolve" | "release") {
+  const queryClient = useQueryClient()
+  const getHeaders = useAuthHeaders()
+
+  return useMutation<{ status: string }, Error, { botId: string; convoId: string }>({
+    mutationFn: async ({ botId, convoId }) => {
+      const headers = await getHeaders()
+      const res = await fetch(
+        `${baseUrl}/api/bots/${botId}/conversations/${convoId}/${action}`,
+        { method: "POST", headers }
+      )
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to ${action} conversation`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations", variables.botId] })
+      queryClient.invalidateQueries({ queryKey: ["messages", variables.convoId] })
+    },
+  })
+}
+
+export function useTakeoverMutation() {
+  return useAgentActionMutation("takeover")
+}
+
+export function useResolveMutation() {
+  return useAgentActionMutation("resolve")
+}
+
+export function useReleaseMutation() {
+  return useAgentActionMutation("release")
+}
+
+export function useAgentReplyMutation() {
+  const queryClient = useQueryClient()
+  const getHeaders = useAuthHeaders()
+
+  return useMutation<Message, Error, { botId: string; convoId: string; content: string }>({
+    mutationFn: async ({ botId, convoId, content }) => {
+      const headers = await getHeaders()
+      const res = await fetch(
+        `${baseUrl}/api/bots/${botId}/conversations/${convoId}/reply`,
+        {
+          method: "POST",
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        }
+      )
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || "Failed to send agent reply")
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations", variables.botId] })
+      queryClient.invalidateQueries({ queryKey: ["messages", variables.convoId] })
+    },
+  })
+}
+
 // ─── Widget Config Hooks ────────────────────────────────────────────
 
 export function useUpdateWidgetConfigMutation() {
