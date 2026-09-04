@@ -18,6 +18,7 @@ import {
   type Conversation,
   type Message,
 } from "types"
+import { subscribeSSE } from "../realtime/hub"
 
 import cors from "cors"
 
@@ -161,10 +162,90 @@ chatRouter.get(
       conversation_id: m.conversationId,
       role: m.role,
       content: m.content,
+      sender_id: m.senderId ?? undefined,
       created_at: m.createdAt.toISOString(),
     }))
 
     res.json(response)
+  }
+)
+
+/**
+ * GET /api/chat/:botId/conversations/:convoId/stream
+ * Visitor-only Server-Sent Events stream (no WebSocket for end users).
+ * Query: ?visitorId=... must match the conversation owner.
+ * Emits RealtimeEvent JSON per SSE frame: agent_message, status_changed, typing, etc.
+ */
+chatRouter.get(
+  "/:botId/conversations/:convoId/stream",
+  validate({ params: ConvoIdParamSchema }),
+  async (req: Request, res: Response) => {
+    const botId = String(req.params.botId)
+    const convoId = String(req.params.convoId)
+    const visitorId = String(req.query.visitorId ?? "")
+
+    if (!visitorId) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "visitorId query param is required",
+      })
+      return
+    }
+
+    const [convo] = await db
+      .select()
+      .from(conversations)
+      .where(
+        and(eq(conversations.id, convoId), eq(conversations.botId, botId))
+      )
+      .limit(1)
+
+    if (!convo) {
+      res.status(404).json({
+        error: "Not Found",
+        message: "Conversation not found",
+      })
+      return
+    }
+
+    if (convo.visitorId !== visitorId) {
+      res.status(403).json({
+        error: "Forbidden",
+        message: "visitorId does not match this conversation",
+      })
+      return
+    }
+
+    res.setHeader("Content-Type", "text/event-stream")
+    res.setHeader("Cache-Control", "no-cache, no-transform")
+    res.setHeader("Connection", "keep-alive")
+    res.setHeader("X-Accel-Buffering", "no")
+    res.flushHeaders?.()
+
+    // Initial hello with current handoff status so widget can render banner
+    res.write(
+      `data: ${JSON.stringify({
+        type: "status_changed",
+        botId,
+        conversationId: convoId,
+        status: convo.status,
+      })}\n\n`
+    )
+
+    const unsubscribe = subscribeSSE(botId, convoId, res, visitorId)
+
+    const ping = setInterval(() => {
+      try {
+        res.write(`: ping\n\n`)
+      } catch {
+        // ignore — close handler cleans up
+      }
+    }, 25000)
+
+    req.on("close", () => {
+      clearInterval(ping)
+      unsubscribe()
+    })
   }
 )
 
@@ -250,7 +331,13 @@ chatRouter.post(
       .orderBy(desc(messages.createdAt), desc(messages.id))
       .limit(10)
 
-    const history = recentMessages.reverse()
+    const history = recentMessages.reverse().map((m) => ({
+      role:
+        m.role === "agent"
+          ? ("assistant" as const)
+          : (m.role as "user" | "assistant" | "system"),
+      content: m.content,
+    }))
 
     // 6. Build RAG prompt with system prompt & retrieved chunks
     const priorHistory = history.slice(0, -1) // exclude current user message from history array
