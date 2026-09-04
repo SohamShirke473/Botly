@@ -231,6 +231,9 @@
       .botly-msg-row.assistant {
         align-self: flex-start;
       }
+      .botly-msg-row.agent {
+        align-self: flex-start;
+      }
       .botly-msg-avatar {
         width: 26px;
         height: 26px;
@@ -263,6 +266,44 @@
         border-top-left-radius: 4px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
       }
+      .botly-msg-row.agent .botly-bubble {
+        background-color: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+        border-top-left-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+      .botly-agent-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #059669;
+        margin-bottom: 4px;
+      }
+      .botly-status-banner {
+        display: none;
+        font-size: 12px;
+        padding: 8px 16px;
+        background: #fffbeb;
+        color: #92400e;
+        border-bottom: 1px solid #fde68a;
+        text-align: center;
+      }
+      .botly-status-banner.show { display: block; }
+      .botly-escalate-btn {
+        margin: 0 16px 8px;
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        color: #374151;
+        cursor: pointer;
+      }
+      .botly-escalate-btn:hover { background: #f9fafb; }
+      .botly-escalate-btn:disabled { opacity: 0.5; cursor: default; }
       .botly-inline-code {
         background: rgba(0, 0, 0, 0.07);
         padding: 2px 5px;
@@ -452,7 +493,9 @@
       <button class="botly-close-btn" aria-label="Close Chat">${ICONS.close}</button>
     </div>
     <div class="botly-messages"></div>
+    <div class="botly-status-banner"></div>
     <div class="botly-input-area">
+      <button type="button" class="botly-escalate-btn">Talk to a human</button>
       <form class="botly-form">
         <input type="text" class="botly-input" placeholder="${escapeHtml(config.placeholder)}" required />
         <button type="submit" class="botly-send-btn" aria-label="Send Message">${ICONS.send}</button>
@@ -474,6 +517,87 @@
   const sendBtn = chatWindow.querySelector(".botly-send-btn")
   const closeBtn = chatWindow.querySelector(".botly-close-btn")
   const titleEl = chatWindow.querySelector(".botly-title")
+  const statusBanner = chatWindow.querySelector(".botly-status-banner")
+  const escalateBtn = chatWindow.querySelector(".botly-escalate-btn")
+
+  let handoffStatus = "bot"
+  let liveSource = null
+
+  function setStatusBanner(status, reason) {
+    handoffStatus = status || "bot"
+    if (!statusBanner) return
+    if (status === "queued") {
+      statusBanner.textContent = "You are in the queue — an agent will join shortly."
+      statusBanner.classList.add("show")
+    } else if (status === "human") {
+      statusBanner.textContent = "A human agent is now chatting with you."
+      statusBanner.classList.add("show")
+    } else if (status === "resolved") {
+      statusBanner.textContent = reason || "Chat resolved — the bot is back with you."
+      statusBanner.classList.add("show")
+    } else {
+      statusBanner.classList.remove("show")
+    }
+    if (escalateBtn) {
+      escalateBtn.disabled = status === "queued" || status === "human"
+      escalateBtn.textContent =
+        status === "queued" ? "Waiting for agent…" : status === "human" ? "Agent connected" : "Talk to a human"
+    }
+  }
+
+  function handleRealtimeEvent(event) {
+    if (!event || !event.type) return
+    if (event.type === "agent_message" && event.message) {
+      appendMessage("agent", event.message.content)
+    } else if (event.type === "status_changed") {
+      setStatusBanner(event.status, event.reason)
+    } else if (event.type === "escalation_request") {
+      setStatusBanner("queued", event.reason)
+    } else if (event.type === "bot_message" && event.message) {
+      appendMessage("assistant", event.message.content)
+    } else if (event.type === "typing") {
+      // Lightweight: no persistent typing row to keep widget simple
+    }
+  }
+
+  // Visitor live stream is SSE-only (EventSource). Admin plane uses Socket.IO.
+  function connectLiveStream() {
+    if (!activeConvoId || typeof EventSource === "undefined") return
+    if (liveSource) {
+      try { liveSource.close() } catch { /* noop */ }
+      liveSource = null
+    }
+    try {
+      const url = `${apiUrl}/api/chat/${botId}/conversations/${activeConvoId}/stream?visitorId=${encodeURIComponent(visitorId)}`
+      liveSource = new EventSource(url)
+      liveSource.onmessage = (e) => {
+        try {
+          handleRealtimeEvent(JSON.parse(e.data))
+        } catch { /* ignore partial frames */ }
+      }
+      liveSource.onerror = () => {
+        // EventSource auto-reconnects; close only on fatal state if needed
+      }
+    } catch { /* SSE optional — widget still works via POST streaming */ }
+  }
+
+  async function requestHuman() {
+    if (!activeConvoId || !escalateBtn) return
+    escalateBtn.disabled = true
+    try {
+      const res = await fetch(`${apiUrl}/api/chat/${botId}/conversations/${activeConvoId}/escalate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId, reason: "Visitor requested a human" }),
+      })
+      if (res.ok) setStatusBanner("queued")
+      else escalateBtn.disabled = false
+    } catch {
+      escalateBtn.disabled = false
+    }
+  }
+
+  if (escalateBtn) escalateBtn.addEventListener("click", requestHuman)
 
   // Toggle Window
   let isOpen = false
@@ -499,9 +623,10 @@
 
   function appendMessage(role, text) {
     const row = document.createElement("div")
-    row.className = `botly-msg-row ${role}`
+    const normalized = role === "agent" ? "agent" : role
+    row.className = `botly-msg-row ${normalized}`
 
-    if (role === "assistant") {
+    if (role === "assistant" || role === "agent") {
       const avatar = document.createElement("div")
       avatar.className = "botly-msg-avatar"
       avatar.innerHTML = ICONS.botAvatar
@@ -510,7 +635,15 @@
 
     const bubble = document.createElement("div")
     bubble.className = "botly-bubble"
-    if (role === "assistant") {
+    if (role === "agent") {
+      const label = document.createElement("div")
+      label.className = "botly-agent-label"
+      label.textContent = "Agent"
+      bubble.appendChild(label)
+      const body = document.createElement("div")
+      body.innerHTML = renderMarkdown(text)
+      bubble.appendChild(body)
+    } else if (role === "assistant") {
       bubble.innerHTML = renderMarkdown(text)
     } else {
       bubble.textContent = text
@@ -565,6 +698,7 @@
             appendMessage(msg.role, msg.content)
           })
         }
+        connectLiveStream()
       })
       .catch(() => {})
   }
@@ -639,6 +773,14 @@
             if (eventData.type === "meta" && eventData.conversationId) {
               activeConvoId = eventData.conversationId
               localStorage.setItem(CONVO_KEY, activeConvoId)
+              connectLiveStream()
+              if (eventData.status) setStatusBanner(eventData.status)
+            } else if (eventData.type === "status_changed") {
+              setStatusBanner(eventData.status, eventData.reason)
+              if (!hasReceivedFirstToken) {
+                bubble.textContent = "An agent will reply here shortly — you are connected live."
+                hasReceivedFirstToken = true
+              }
             } else if (eventData.type === "delta" && eventData.text) {
               if (!hasReceivedFirstToken) {
                 bubble.textContent = ""
