@@ -162,6 +162,17 @@ export type DocumentStatusUpdate = z.infer<typeof DocumentStatusUpdateSchema>
 
 // ─── Chat / Conversation Schemas ────────────────────────────────────
 
+export const ConversationStatusSchema = z.enum([
+  "bot",
+  "queued",
+  "human",
+  "resolved",
+])
+export type ConversationStatus = z.infer<typeof ConversationStatusSchema>
+
+export const MessageRoleSchema = z.enum(["user", "assistant", "system", "agent"])
+export type MessageRole = z.infer<typeof MessageRoleSchema>
+
 export const ConversationSchema = z.object({
   id: z.string().uuid(),
   bot_id: z.string().uuid(),
@@ -169,14 +180,18 @@ export const ConversationSchema = z.object({
   created_at: z.string(),
   last_message: z.string().optional(),
   message_count: z.number().optional(),
+  status: ConversationStatusSchema.optional(),
+  assigned_agent_id: z.string().nullable().optional(),
+  escalation_reason: z.string().nullable().optional(),
 })
 export type Conversation = z.infer<typeof ConversationSchema>
 
 export const MessageSchema = z.object({
   id: z.string().uuid(),
   conversation_id: z.string().uuid(),
-  role: z.enum(["user", "assistant", "system"]),
+  role: z.enum(["user", "assistant", "system", "agent"]),
   content: z.string(),
+  sender_id: z.string().nullable().optional(),
   created_at: z.string(),
 })
 export type Message = z.infer<typeof MessageSchema>
@@ -192,6 +207,41 @@ export const SendChatMessageSchema = z.object({
   message: z.string().min(1, "Message cannot be empty").max(4000),
 })
 export type SendChatMessageInput = z.infer<typeof SendChatMessageSchema>
+
+// ─── Human-in-the-Loop / Realtime Schemas ───────────────────────────
+
+export const EscalateConversationSchema = z.object({
+  reason: z.string().max(500).optional(),
+})
+export type EscalateConversationInput = z.infer<
+  typeof EscalateConversationSchema
+>
+
+export const AgentReplySchema = z.object({
+  content: z.string().min(1, "Message cannot be empty").max(4000),
+})
+export type AgentReplyInput = z.infer<typeof AgentReplySchema>
+
+export const RealtimeEventTypeSchema = z.enum([
+  "agent_message",
+  "bot_message",
+  "user_message",
+  "status_changed",
+  "typing",
+  "escalation_request",
+])
+export type RealtimeEventType = z.infer<typeof RealtimeEventTypeSchema>
+
+export const RealtimeEventSchema = z.object({
+  type: RealtimeEventTypeSchema,
+  conversationId: z.string().uuid(),
+  botId: z.string().uuid(),
+  status: ConversationStatusSchema.optional(),
+  message: MessageSchema.optional(),
+  reason: z.string().optional(),
+  actorId: z.string().optional(),
+})
+export type RealtimeEvent = z.infer<typeof RealtimeEventSchema>
 
 // ─── Embed & Public Config Schemas ──────────────────────────────────
 

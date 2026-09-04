@@ -21,6 +21,14 @@ export const messageRoleEnum = pgEnum("message_role", [
   "user",
   "assistant",
   "system",
+  "agent",
+])
+
+export const conversationStatusEnum = pgEnum("conversation_status", [
+  "bot",
+  "queued",
+  "human",
+  "resolved",
 ])
 
 export const bots = pgTable(
@@ -84,7 +92,12 @@ export const conversations = pgTable(
       .references(() => bots.id, { onDelete: "cascade" })
       .notNull(),
     visitorId: text("visitor_id").notNull(),
+    status: conversationStatusEnum("status").notNull().default("bot"),
+    assignedAgentId: text("assigned_agent_id"),
+    escalationReason: text("escalation_reason"),
+    escalatedAt: timestamp("escalated_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [index("conversations_bot_id_idx").on(table.botId)]
 )
@@ -98,6 +111,7 @@ export const messages = pgTable(
       .notNull(),
     role: messageRoleEnum("role").notNull(),
     content: text("content").notNull(),
+    senderId: text("sender_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [index("messages_conversation_id_idx").on(table.conversationId)]
