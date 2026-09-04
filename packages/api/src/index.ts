@@ -24,6 +24,7 @@ import {
   directConversationsRouter,
 } from "./routes/analytics"
 import { internalRouter } from "./routes/internal"
+import { initRealtimeIO } from "./realtime/socket"
 
 import { logger } from "./lib/logger"
 export { logger }
@@ -254,6 +255,9 @@ const server = app.listen(PORT, () => {
   logger.info(`   Health check: http://localhost:${PORT}/api/health`)
   logger.info(`   Widget script: http://localhost:${PORT}/widget.js`)
 })
+
+// Admin realtime plane (Socket.IO, same port). Visitor plane stays SSE-only.
+initRealtimeIO(server)
 
 const shutdown = (signal: string) => {
   logger.info(`Received ${signal}. Closing HTTP server gracefully...`)
