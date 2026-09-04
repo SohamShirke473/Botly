@@ -50,6 +50,9 @@ analyticsRouter.get(
         botId: conversations.botId,
         visitorId: conversations.visitorId,
         createdAt: conversations.createdAt,
+        status: conversations.status,
+        assignedAgentId: conversations.assignedAgentId,
+        escalationReason: conversations.escalationReason,
         messageCount: sql<number>`count(${messages.id})::int`,
         lastMessage: sql<string | null>`(
           SELECT content FROM messages
@@ -73,6 +76,9 @@ analyticsRouter.get(
       created_at: c.createdAt.toISOString(),
       message_count: c.messageCount,
       last_message: c.lastMessage ?? undefined,
+      status: c.status,
+      assigned_agent_id: c.assignedAgentId ?? undefined,
+      escalation_reason: c.escalationReason ?? undefined,
     }))
 
     res.json(response)
@@ -132,6 +138,7 @@ analyticsRouter.get(
       conversation_id: m.conversationId,
       role: m.role,
       content: m.content,
+      sender_id: m.senderId ?? undefined,
       created_at: m.createdAt.toISOString(),
     }))
 
@@ -263,6 +270,7 @@ directConversationsRouter.get(
       conversation_id: m.conversationId,
       role: m.role,
       content: m.content,
+      sender_id: m.senderId ?? undefined,
       created_at: m.createdAt.toISOString(),
     }))
 

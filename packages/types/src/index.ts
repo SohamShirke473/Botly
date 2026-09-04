@@ -212,6 +212,7 @@ export type SendChatMessageInput = z.infer<typeof SendChatMessageSchema>
 
 export const EscalateConversationSchema = z.object({
   reason: z.string().max(500).optional(),
+  visitorId: z.string().min(1).optional(),
 })
 export type EscalateConversationInput = z.infer<
   typeof EscalateConversationSchema

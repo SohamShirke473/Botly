@@ -18,7 +18,9 @@ import {
   type Conversation,
   type Message,
 } from "types"
-import { subscribeSSE } from "../realtime/hub"
+import { subscribeSSE, publish } from "../realtime/hub"
+import { tool } from "ai"
+import { z } from "types"
 
 import cors from "cors"
 
@@ -277,6 +279,7 @@ chatRouter.post(
 
     // 2. Ensure active conversation; fail with 404 if provided ID is invalid
     let activeConvoId = inputConvoId
+    let activeStatus: "bot" | "queued" | "human" | "resolved" = "bot"
     if (activeConvoId) {
       const [existingConvo] = await db
         .select()
@@ -296,6 +299,7 @@ chatRouter.post(
         })
         return
       }
+      activeStatus = existingConvo.status
     } else {
       const [newConvo] = await db
         .insert(conversations)
@@ -305,14 +309,52 @@ chatRouter.post(
         })
         .returning()
       activeConvoId = newConvo.id
+      activeStatus = newConvo.status
     }
 
     // 3. Save visitor message to database
-    await db.insert(messages).values({
+    const [savedUserMsg] = await db
+      .insert(messages)
+      .values({
+        conversationId: activeConvoId,
+        role: "user",
+        content: userMessage,
+      })
+      .returning()
+
+    // Notify admin plane of inbound visitor message (live inbox)
+    publish({
+      type: "user_message",
+      botId,
       conversationId: activeConvoId,
-      role: "user",
-      content: userMessage,
+      status: activeStatus,
+      message: {
+        id: savedUserMsg.id,
+        conversation_id: savedUserMsg.conversationId,
+        role: "user",
+        content: savedUserMsg.content,
+        created_at: savedUserMsg.createdAt.toISOString(),
+      },
     })
+
+    // 3b. Human takeover suppression: bot stays silent while queued/human
+    if (activeStatus === "queued" || activeStatus === "human") {
+      res.setHeader("Content-Type", "text/event-stream")
+      res.setHeader("Cache-Control", "no-cache, no-transform")
+      res.setHeader("Connection", "keep-alive")
+      res.flushHeaders?.()
+      res.write(
+        `data: ${JSON.stringify({ type: "meta", conversationId: activeConvoId, status: activeStatus })}\n\n`
+      )
+      res.write(
+        `data: ${JSON.stringify({ type: "status_changed", status: activeStatus, conversationId: activeConvoId })}\n\n`
+      )
+      res.write(
+        `data: ${JSON.stringify({ type: "done", conversationId: activeConvoId })}\n\n`
+      )
+      res.end()
+      return
+    }
 
     // 4. Generate embedding for user query
     let relevantChunks: RelevantChunk[] = []
@@ -341,12 +383,19 @@ chatRouter.post(
 
     // 6. Build RAG prompt with system prompt & retrieved chunks
     const priorHistory = history.slice(0, -1) // exclude current user message from history array
-    const { system, messages: promptMessages } = buildRagPrompt(
+    const { system: baseSystem, messages: promptMessages } = buildRagPrompt(
       bot.systemPrompt,
       relevantChunks,
       priorHistory,
       userMessage
     )
+    const system =
+      `${baseSystem}\n\n--- HANDOFF POLICY ---\n` +
+      `You can hand the conversation to a human agent by calling the escalate_to_human tool. ` +
+      `Call it when: the visitor explicitly asks for a human/agent/support person; ` +
+      `the documentation has no answer and you cannot help; the issue needs account access, refunds, or sensitive actions; ` +
+      `or the visitor is frustrated/abusive and a human should intervene. ` +
+      `Do not call it for normal questions you can answer. When you escalate, give a one-sentence acknowledgement first.`
 
     // 7. Setup SSE streaming headers
     res.setHeader("Content-Type", "text/event-stream")
@@ -363,10 +412,24 @@ chatRouter.post(
     )
 
     try {
-      // 8. Stream text using Mistral via @botly/ai
+      // 8. Stream text using Mistral via @botly/ai (AI may decide to escalate)
+      let aiEscalationReason: string | null = null
       const streamResult = streamText({
         system,
         messages: promptMessages,
+        tools: {
+          escalate_to_human: tool({
+            description:
+              "Hand this conversation to a human support agent with a short reason.",
+            inputSchema: z.object({
+              reason: z.string().describe("Short reason for escalation"),
+            }),
+            execute: async ({ reason }: { reason: string }) => {
+              aiEscalationReason = reason
+              return "Escalated to human queue."
+            },
+          }),
+        },
       })
 
       let fullAssistantText = ""
@@ -381,12 +444,60 @@ chatRouter.post(
         )
       }
 
-      // 9. Persist assistant message to database
-      if (fullAssistantText.trim()) {
+      // 8b. AI-decided escalation: flip to queue, notify both planes
+      if (aiEscalationReason) {
+        await db
+          .update(conversations)
+          .set({
+            status: "queued",
+            escalationReason: aiEscalationReason,
+            escalatedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(conversations.id, activeConvoId))
+
         await db.insert(messages).values({
           conversationId: activeConvoId,
-          role: "assistant",
-          content: fullAssistantText,
+          role: "system",
+          content: `AI escalated to human: ${aiEscalationReason}`,
+        })
+
+        publish({
+          type: "escalation_request",
+          botId,
+          conversationId: activeConvoId,
+          status: "queued",
+          reason: aiEscalationReason,
+        })
+        publish({
+          type: "status_changed",
+          botId,
+          conversationId: activeConvoId,
+          status: "queued",
+        })
+      }
+
+      // 9. Persist assistant message to database
+      if (fullAssistantText.trim()) {
+        const [savedBot] = await db
+          .insert(messages)
+          .values({
+            conversationId: activeConvoId,
+            role: "assistant",
+            content: fullAssistantText,
+          })
+          .returning()
+        publish({
+          type: "bot_message",
+          botId,
+          conversationId: activeConvoId,
+          message: {
+            id: savedBot.id,
+            conversation_id: savedBot.conversationId,
+            role: "assistant",
+            content: savedBot.content,
+            created_at: savedBot.createdAt.toISOString(),
+          },
         })
       }
 

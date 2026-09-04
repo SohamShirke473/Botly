@@ -19,6 +19,7 @@ import {
   botDocumentsRouter,
 } from "./routes/documents"
 import { chatRouter } from "./routes/chat"
+import { handoffRouter, agentRouter } from "./routes/handoff"
 import {
   analyticsRouter,
   directConversationsRouter,
@@ -221,6 +222,10 @@ app.use("/api/documents", documentsRouter)
 
 // Public Chat / RAG widget routes: /api/chat/:botId
 app.use("/api/chat", chatRouter)
+app.use("/api/chat", handoffRouter)
+
+// Agent HIL routes (Clerk org auth): /api/bots/:botId/conversations/:convoId/*
+app.use("/api/bots", agentRouter)
 
 // Analytics & Conversations dashboard routes: /api/bots/:botId/conversations & /api/bots/:botId/stats
 app.use("/api/bots", analyticsRouter)
