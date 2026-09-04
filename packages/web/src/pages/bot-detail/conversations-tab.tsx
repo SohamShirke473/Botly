@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   useConversationsQuery,
   useMessagesQuery,
@@ -100,6 +100,15 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
 
   const activeConvo = convosQuery.data?.find((c) => c.id === activeId)
   const status = activeConvo?.status ?? "bot"
+
+  // Always land at the newest message when switching sessions or receiving live updates
+  const transcriptRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const viewport = transcriptRef.current
+      ?.closest('[data-slot="scroll-area"]')
+      ?.querySelector('[data-slot="scroll-area-viewport"]')
+    if (viewport) viewport.scrollTop = viewport.scrollHeight
+  }, [messagesQuery.data, activeId])
 
   const sendReply = () => {
     const content = draft.trim()
@@ -281,7 +290,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
             </div>
 
             <ScrollArea className="min-h-0 flex-1 p-4">
-              <div className="space-y-4 max-w-3xl mx-auto py-2">
+              <div ref={transcriptRef} className="space-y-4 max-w-3xl mx-auto py-2">
                 {messagesQuery.isLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
