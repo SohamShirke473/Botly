@@ -273,18 +273,25 @@ chatRouter.post(
       .where(eq(tickets.conversationId, convoId))
       .limit(1)
 
+    let targetTicketId = existingTicket?.id
+
     if (!existingTicket) {
-      await db.insert(tickets).values({
-        orgId: bot.orgId,
-        botId,
-        conversationId: convoId,
-        status: "open",
-        priority: "high",
-        escalationReason: "visitor_requested",
-        visitorName: visitorName || convo.visitorName || null,
-        visitorEmail: visitorEmail || convo.visitorEmail || null,
-        aiSummary: reason || "Visitor requested human support assistance.",
-      })
+      const [insertedTicket] = await db
+        .insert(tickets)
+        .values({
+          orgId: bot.orgId,
+          botId,
+          conversationId: convoId,
+          status: "open",
+          priority: "high",
+          escalationReason: "visitor_requested",
+          visitorName: visitorName || convo.visitorName || null,
+          visitorEmail: visitorEmail || convo.visitorEmail || null,
+          aiSummary: reason || "Visitor requested human support assistance.",
+        })
+        .returning({ id: tickets.id })
+
+      targetTicketId = insertedTicket?.id
     }
 
     // Insert system notification message in conversation transcript
@@ -307,6 +314,7 @@ chatRouter.post(
     broadcastToOrg(bot.orgId, {
       type: "ticket:created",
       payload: {
+        id: targetTicketId,
         conversationId: convoId,
         botId,
         status: "open",
@@ -329,6 +337,7 @@ chatRouter.post(
     res.json({
       success: true,
       status: "waiting_agent",
+      ticketId: targetTicketId,
       message: "Support ticket opened. A human agent will assist you shortly.",
     })
   }

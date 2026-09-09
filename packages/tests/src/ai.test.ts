@@ -4,6 +4,7 @@ import {
   embedText,
   embedManyTexts,
   streamText,
+  generateText,
   DEFAULT_CHAT_MODEL,
   DEFAULT_EMBEDDING_MODEL,
   MISTRAL_EMBED_DIMENSIONS,
@@ -136,5 +137,25 @@ startxref
 describe("@botly/ai - Web Scraping (Firecrawl)", () => {
   it("exports scrapeUrl function", () => {
     expect(typeof scrapeUrl).toBe("function")
+  })
+})
+
+describe("@botly/ai - Text Generation (Gemini)", () => {
+  it("generates text from prompt using generateText", async () => {
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn("Skipping live generateText test: GEMINI_API_KEY missing")
+      return
+    }
+
+    const { text, usage } = await generateText({
+      prompt: "Reply with the single word: OK",
+    })
+
+    expect(text).toBeDefined()
+    expect(typeof text).toBe("string")
+    expect(text.trim().toLowerCase()).toContain("ok")
+    if (usage) {
+      expect(usage.totalTokens).toBeGreaterThan(0)
+    }
   })
 })
