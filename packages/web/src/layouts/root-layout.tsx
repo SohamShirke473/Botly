@@ -32,6 +32,7 @@ import {
   Search,
   Users,
   CreditCard,
+  Ticket,
 } from "lucide-react"
 
 export function RootLayout() {
@@ -57,6 +58,9 @@ export function RootLayout() {
         { label: "Bots", href: "/dashboard" },
         { label: foundBot?.name || "Bot Detail" },
       ]
+    }
+    if (pathname.startsWith("/dashboard/tickets")) {
+      return [{ label: "Support Tickets" }]
     }
     if (pathname === "/dashboard/organization") {
       return [{ label: "Team & Members" }]
@@ -170,6 +174,18 @@ export function RootLayout() {
                   >
                     <MessageSquareText className="size-4" />
                     <span>All Bots</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                {/* Support Tickets Main link */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to="/dashboard/tickets" />}
+                    tooltip="Support Tickets & Handoff"
+                    isActive={pathname.startsWith("/dashboard/tickets")}
+                  >
+                    <Ticket className="size-4" />
+                    <span>Support Tickets</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 

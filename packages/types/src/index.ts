@@ -166,8 +166,12 @@ export const ConversationSchema = z.object({
   id: z.string().uuid(),
   bot_id: z.string().uuid(),
   visitor_id: z.string(),
+  status: z.string().default("bot"),
+  visitor_name: z.string().nullable().optional(),
+  visitor_email: z.string().nullable().optional(),
   created_at: z.string(),
   last_message: z.string().optional(),
+  last_message_at: z.string().optional(),
   message_count: z.number().optional(),
 })
 export type Conversation = z.infer<typeof ConversationSchema>
@@ -175,11 +179,82 @@ export type Conversation = z.infer<typeof ConversationSchema>
 export const MessageSchema = z.object({
   id: z.string().uuid(),
   conversation_id: z.string().uuid(),
-  role: z.enum(["user", "assistant", "system"]),
+  role: z.enum(["user", "assistant", "system", "agent"]),
   content: z.string(),
+  is_human: z.boolean().optional(),
+  sender_name: z.string().nullable().optional(),
   created_at: z.string(),
 })
 export type Message = z.infer<typeof MessageSchema>
+
+// ─── Tickets & Handoff Schemas ──────────────────────────────────────
+
+export const TicketStatusSchema = z.enum([
+  "open",
+  "in_progress",
+  "resolved",
+  "closed",
+])
+export type TicketStatus = z.infer<typeof TicketStatusSchema>
+
+export const TicketPrioritySchema = z.enum([
+  "low",
+  "medium",
+  "high",
+  "urgent",
+])
+export type TicketPriority = z.infer<typeof TicketPrioritySchema>
+
+export const EscalationReasonSchema = z.enum([
+  "visitor_requested",
+  "ai_frustration",
+  "ai_uncertainty",
+  "manual",
+])
+export type EscalationReason = z.infer<typeof EscalationReasonSchema>
+
+export const TicketSchema = z.object({
+  id: z.string().uuid(),
+  org_id: z.string(),
+  bot_id: z.string().uuid(),
+  conversation_id: z.string().uuid(),
+  status: TicketStatusSchema,
+  priority: TicketPrioritySchema,
+  escalation_reason: EscalationReasonSchema,
+  visitor_name: z.string().nullable().optional(),
+  visitor_email: z.string().nullable().optional(),
+  assigned_to: z.string().nullable().optional(),
+  assigned_to_name: z.string().nullable().optional(),
+  ai_summary: z.string().nullable().optional(),
+  sentiment: z.string().nullable().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  // Joined fields for UI convenience
+  bot_name: z.string().optional(),
+  last_message: z.string().optional(),
+  message_count: z.number().optional(),
+})
+export type Ticket = z.infer<typeof TicketSchema>
+
+export const UpdateTicketSchema = z.object({
+  status: TicketStatusSchema.optional(),
+  priority: TicketPrioritySchema.optional(),
+  assigned_to: z.string().nullable().optional(),
+  assigned_to_name: z.string().nullable().optional(),
+})
+export type UpdateTicketInput = z.infer<typeof UpdateTicketSchema>
+
+export const HandoffRequestSchema = z.object({
+  visitorName: z.string().max(100).optional(),
+  visitorEmail: z.string().email("Invalid email").optional().or(z.literal("")),
+  reason: z.string().max(300).optional(),
+})
+export type HandoffRequestInput = z.infer<typeof HandoffRequestSchema>
+
+export const AgentSendMessageSchema = z.object({
+  content: z.string().min(1, "Message cannot be empty").max(4000),
+})
+export type AgentSendMessageInput = z.infer<typeof AgentSendMessageSchema>
 
 export const StartConversationSchema = z.object({
   visitorId: z.string().min(1, "visitorId is required"),

@@ -8,6 +8,8 @@ import type {
   CreateBotInput,
   WidgetConfig,
   BotStatsResponse,
+  Ticket,
+  UpdateTicketInput,
 } from "types"
 
 const baseUrl = import.meta.env.VITE_API_URL || ""
@@ -344,6 +346,159 @@ export function useMessagesQuery(conversationId: string | undefined) {
       return res.json()
     },
     enabled: !!conversationId,
+  })
+}
+
+// ─── Support Ticket Hooks ──────────────────────────────────────────
+
+export function useTicketsQuery(filters?: {
+  status?: string
+  priority?: string
+  botId?: string
+}) {
+  const getHeaders = useAuthHeaders()
+
+  return useQuery<Ticket[], Error>({
+    queryKey: ["tickets", filters?.status, filters?.priority, filters?.botId],
+    queryFn: async () => {
+      const headers = await getHeaders()
+      const params = new URLSearchParams()
+      if (filters?.status && filters.status !== "all") params.set("status", filters.status)
+      if (filters?.priority && filters.priority !== "all") params.set("priority", filters.priority)
+      if (filters?.botId) params.set("botId", filters.botId)
+
+      const url = `${baseUrl}/api/tickets${params.toString() ? `?${params.toString()}` : ""}`
+      const res = await fetch(url, { headers })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to fetch tickets (HTTP ${res.status})`)
+      }
+      return res.json()
+    },
+    refetchInterval: 15000,
+  })
+}
+
+export function useTicketQuery(ticketId: string | undefined) {
+  const getHeaders = useAuthHeaders()
+
+  return useQuery<{ ticket: Ticket; messages: Message[] }, Error>({
+    queryKey: ["tickets", ticketId],
+    queryFn: async () => {
+      if (!ticketId) throw new Error("No ticket ID provided")
+      const headers = await getHeaders()
+      const res = await fetch(`${baseUrl}/api/tickets/${ticketId}`, { headers })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to fetch ticket ${ticketId} (HTTP ${res.status})`)
+      }
+      return res.json()
+    },
+    enabled: !!ticketId,
+  })
+}
+
+export function useUpdateTicketMutation() {
+  const queryClient = useQueryClient()
+  const getHeaders = useAuthHeaders()
+
+  return useMutation<Ticket, Error, { ticketId: string; updates: UpdateTicketInput }>({
+    mutationFn: async ({ ticketId, updates }) => {
+      const headers = await getHeaders()
+      const res = await fetch(`${baseUrl}/api/tickets/${ticketId}`, {
+        method: "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to update ticket (HTTP ${res.status})`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tickets"] })
+      queryClient.invalidateQueries({ queryKey: ["tickets", variables.ticketId] })
+      queryClient.invalidateQueries({ queryKey: ["conversations"] })
+    },
+  })
+}
+
+export function useSendAgentTicketMessageMutation() {
+  const queryClient = useQueryClient()
+  const getHeaders = useAuthHeaders()
+
+  return useMutation<Message, Error, { ticketId: string; content: string }>({
+    mutationFn: async ({ ticketId, content }) => {
+      const headers = await getHeaders()
+      const res = await fetch(`${baseUrl}/api/tickets/${ticketId}/messages`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to send agent message (HTTP ${res.status})`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tickets", variables.ticketId] })
+      queryClient.invalidateQueries({ queryKey: ["tickets"] })
+      queryClient.invalidateQueries({ queryKey: ["conversations"] })
+    },
+  })
+}
+
+export function useSendConversationMessageMutation() {
+  const queryClient = useQueryClient()
+  const getHeaders = useAuthHeaders()
+
+  return useMutation<Message, Error, { conversationId: string; content: string }>({
+    mutationFn: async ({ conversationId, content }) => {
+      const headers = await getHeaders()
+      const res = await fetch(`${baseUrl}/api/conversations/${conversationId}/messages`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to send message (HTTP ${res.status})`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["messages", variables.conversationId] })
+      queryClient.invalidateQueries({ queryKey: ["conversations"] })
+      queryClient.invalidateQueries({ queryKey: ["tickets"] })
+    },
+  })
+}
+
+export function useUpdateConversationStatusMutation() {
+  const queryClient = useQueryClient()
+  const getHeaders = useAuthHeaders()
+
+  return useMutation<{ success: boolean; status: string }, Error, { conversationId: string; status: string }>({
+    mutationFn: async ({ conversationId, status }) => {
+      const headers = await getHeaders()
+      const res = await fetch(`${baseUrl}/api/conversations/${conversationId}/status`, {
+        method: "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `Failed to update status (HTTP ${res.status})`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] })
+      queryClient.invalidateQueries({ queryKey: ["messages", variables.conversationId] })
+      queryClient.invalidateQueries({ queryKey: ["tickets"] })
+    },
   })
 }
 

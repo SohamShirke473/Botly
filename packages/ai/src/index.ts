@@ -9,6 +9,9 @@ export {
 export { streamText } from "./stream"
 export type { StreamTextOptions, StreamTextResult } from "./stream"
 
+export { generateText } from "./generate"
+export type { GenerateTextOptions } from "./generate"
+
 export { embedText, embedManyTexts } from "./embed"
 export type { EmbedOptions, EmbedResult, EmbedManyResult } from "./embed"
 
