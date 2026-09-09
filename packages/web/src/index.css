@@ -197,27 +197,277 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* Clerk Visibility in Dark & Light Modes */
-.dark .cl-organizationSwitcherTrigger,
-.dark .cl-organizationPreviewMainIdentifier,
-.dark .cl-organizationPreviewTextContainer,
-.dark .cl-organizationSwitcherTriggerIcon {
+/* ─── Comprehensive Clerk Design System Overrides ────────────────── */
+.cl-rootBox {
+  width: 100%;
+}
+
+.cl-organizationProfile-root,
+.cl-createOrganization-root,
+.cl-userProfile-root {
+  width: 100%;
+  max-width: 56rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cl-cardBox {
+  width: 100%;
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden !important;
+}
+
+.cl-card {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.cl-navbar {
+  background-color: var(--muted) !important;
+  border-right: 1px solid var(--border) !important;
+  padding: 1.25rem 1rem !important;
+}
+
+.cl-navbarTitle {
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  color: var(--foreground) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.cl-navbarSubtitle {
+  color: var(--muted-foreground) !important;
+  font-size: 0.75rem !important;
+}
+
+.cl-navbarButton {
+  font-family: var(--font-sans) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  color: var(--muted-foreground) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: all 0.15s ease !important;
+}
+
+.cl-navbarButton:hover {
+  background-color: var(--accent) !important;
   color: var(--foreground) !important;
 }
 
-.dark .cl-organizationSwitcherTrigger {
-  border-color: var(--border) !important;
-  background-color: transparent !important;
+.cl-navbarButton[data-active="true"],
+.cl-navbarButton__active {
+  background-color: rgba(176, 58, 46, 0.12) !important;
+  color: var(--primary) !important;
+  font-weight: 600 !important;
 }
 
-.dark .cl-organizationSwitcherTrigger:hover {
+.cl-pageScrollBox {
+  background-color: var(--card) !important;
+  padding: 1.75rem !important;
+}
+
+.cl-headerTitle {
+  font-family: var(--font-sans) !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: var(--foreground) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.cl-headerSubtitle {
+  font-family: var(--font-sans) !important;
+  font-size: 0.75rem !important;
+  color: var(--muted-foreground) !important;
+}
+
+.cl-profileSection {
+  border-bottom: 1px solid var(--border) !important;
+  padding-top: 1.25rem !important;
+  padding-bottom: 1.25rem !important;
+}
+
+.cl-profileSection:last-child {
+  border-bottom: none !important;
+}
+
+.cl-profileSectionTitle,
+.cl-profileSectionTitleText {
+  color: var(--foreground) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+}
+
+.cl-profileSectionContent {
+  color: var(--muted-foreground) !important;
+  font-size: 0.75rem !important;
+}
+
+.cl-profileSectionPrimaryButton {
+  font-family: var(--font-sans) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.375rem 0.75rem !important;
+  transition: all 0.15s ease !important;
+}
+
+.cl-profileSectionPrimaryButton:hover {
+  background-color: var(--accent) !important;
+  border-color: var(--border) !important;
+}
+
+.cl-formButtonPrimary,
+.cl-membersPageInviteButton {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.15s ease !important;
+}
+
+.cl-formButtonPrimary:hover,
+.cl-membersPageInviteButton:hover {
+  background-color: #9c3328 !important;
+}
+
+.cl-formButtonReset {
+  color: var(--muted-foreground) !important;
+  font-size: 0.75rem !important;
+}
+
+.cl-formButtonReset:hover {
+  color: var(--foreground) !important;
+}
+
+.cl-formFieldInput {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.8125rem !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+.cl-formFieldLabel {
+  font-family: var(--font-sans) !important;
+  color: var(--foreground) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+}
+
+/* Destructive danger actions (Leave / Delete Org) */
+.cl-profileSection[data-variant="danger"] button,
+.cl-profileSectionDangerLink {
+  color: var(--destructive) !important;
+  font-weight: 500 !important;
+  font-size: 0.8125rem !important;
+  background-color: rgba(176, 58, 46, 0.08) !important;
+  border: 1px solid rgba(176, 58, 46, 0.25) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.375rem 0.75rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  transition: all 0.15s ease !important;
+}
+
+.cl-profileSection[data-variant="danger"] button:hover,
+.cl-profileSectionDangerLink:hover {
+  background-color: rgba(176, 58, 46, 0.15) !important;
+}
+
+/* Members table */
+.cl-table {
+  font-family: var(--font-sans) !important;
+  font-size: 0.75rem !important;
+  border-color: var(--border) !important;
+}
+
+.cl-tableHead {
+  color: var(--muted-foreground) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.cl-tableRow {
+  border-bottom: 1px solid var(--border) !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.cl-tableRow:hover {
   background-color: var(--muted) !important;
 }
 
-.dark .cl-organizationSwitcherPopoverCard {
-  background-color: var(--popover) !important;
+.cl-tableCell {
+  color: var(--foreground) !important;
+  padding: 0.75rem 0.5rem !important;
+}
+
+.cl-badge {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.6875rem !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Hide Clerk watermarks */
+.cl-footer,
+.cl-footerAction,
+.cl-internal-b3fm6y {
+  display: none !important;
+}
+
+/* Organization Switcher & Popover */
+.cl-organizationSwitcherTrigger {
+  color: var(--foreground) !important;
   border-color: var(--border) !important;
+  background-color: var(--card) !important;
+}
+
+.cl-organizationSwitcherTrigger:hover {
+  background-color: var(--muted) !important;
+}
+
+.cl-organizationSwitcherPopoverCard,
+.cl-popoverBox,
+.cl-menuList {
+  background-color: var(--popover) !important;
+  border: 1px solid var(--border) !important;
   color: var(--popover-foreground) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+.cl-menuItem {
+  color: var(--popover-foreground) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.75rem !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.cl-menuItem:hover {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
 }
 
 /* ─── Botly Design System ──────────────────────────────────────────── */

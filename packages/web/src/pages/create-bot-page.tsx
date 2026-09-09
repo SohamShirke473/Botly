@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useCreateBotMutation } from "@/hooks/use-api"
 import { toast } from "sonner"
-import { ArrowLeft, Bot, Loader2, Sparkles, Plus } from "lucide-react"
+import { ArrowLeft, Bot, Loader2, Plus } from "lucide-react"
 
 const PROMPT_PRESETS = [
   {
@@ -122,8 +122,7 @@ export function CreateBotPage() {
 
               {/* Starter Presets */}
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] text-muted-foreground mr-1 flex items-center gap-1">
-                  <Sparkles className="size-3 text-primary/70" />
+                <span className="text-[11px] text-muted-foreground mr-1">
                   Presets:
                 </span>
                 {PROMPT_PRESETS.map((preset) => (

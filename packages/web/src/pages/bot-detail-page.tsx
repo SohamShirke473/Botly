@@ -1,11 +1,8 @@
-import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useBotQuery } from "@/hooks/use-api"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { toast } from "sonner"
 import {
   ArrowLeft,
   Settings,
@@ -15,8 +12,6 @@ import {
   Bot as BotIcon,
   Clock,
   BarChart3,
-  Copy,
-  Check,
 } from "lucide-react"
 
 import { KnowledgeBaseTab } from "./bot-detail/knowledge-base-tab"
@@ -29,14 +24,6 @@ export function BotDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const botQuery = useBotQuery(id)
-  const [copiedId, setCopiedId] = useState(false)
-
-  const copyId = (botId: string) => {
-    navigator.clipboard.writeText(botId)
-    setCopiedId(true)
-    toast.success("Bot ID copied to clipboard")
-    setTimeout(() => setCopiedId(false), 2000)
-  }
 
   if (botQuery.isLoading) {
     return (
@@ -51,7 +38,7 @@ export function BotDetailPage() {
             </div>
           </div>
           <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-[400px] w-full rounded-xl" />
+          <Skeleton className="h-100 w-full rounded-xl" />
         </div>
       </div>
     )
@@ -105,33 +92,24 @@ export function BotDetailPage() {
                 <h1 className="text-xl font-bold tracking-tight text-foreground">
                   {bot.name}
                 </h1>
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] font-medium bg-status-ready/10 text-status-ready gap-1"
-                >
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-status-ready/15 px-2.5 py-0.5 text-[11px] font-medium text-status-ready border border-status-ready/20">
                   <span className="size-1.5 rounded-full bg-status-ready animate-pulse" />
                   Active
-                </Badge>
+                </span>
               </div>
               <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => copyId(bot.id)}
-                  className="font-mono text-[11px] hover:text-foreground inline-flex items-center gap-1 bg-muted/60 hover:bg-muted px-1.5 py-0.5 rounded border border-border transition-colors cursor-pointer"
-                  title="Click to copy full Bot ID"
-                >
-                  <span>{bot.id.slice(0, 8)}...</span>
-                  {copiedId ? (
-                    <Check className="size-2.5 text-status-ready" />
-                  ) : (
-                    <Copy className="size-2.5 text-muted-foreground" />
-                  )}
-                </button>
-                <span className="text-border">•</span>
                 <span className="flex items-center gap-1 text-[11px]">
                   <Clock className="size-3 text-muted-foreground/70" />
                   Created {new Date(bot.created_at).toLocaleDateString()}
                 </span>
+                {bot.system_prompt && (
+                  <>
+                    <span className="text-border">•</span>
+                    <span className="text-[11px] text-muted-foreground/80">
+                      Custom Prompt Configured
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -139,42 +117,42 @@ export function BotDetailPage() {
       </div>
 
       {/* Tabs Hub */}
-      <Tabs defaultValue="knowledge-base" className="space-y-4">
-        <div className="border-b border-border/80 pb-px overflow-x-auto">
-          <TabsList className="bg-transparent p-0 gap-1 h-9 justify-start">
+      <Tabs defaultValue="knowledge-base" className="space-y-6">
+        <div className="overflow-x-auto pb-0.5">
+          <TabsList className="h-10 p-1 bg-muted/60 border border-border/70 rounded-xl inline-flex items-center gap-1">
             <TabsTrigger
               value="knowledge-base"
-              className="gap-1.5 text-xs data-active:border-b-2 data-active:border-foreground data-active:bg-transparent rounded-none px-3 py-1.5"
+              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
             >
-              <Database className="size-3.5" />
+              <Database className="size-3.5 shrink-0" />
               <span>Knowledge Base</span>
             </TabsTrigger>
             <TabsTrigger
               value="install"
-              className="gap-1.5 text-xs data-active:border-b-2 data-active:border-foreground data-active:bg-transparent rounded-none px-3 py-1.5"
+              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
             >
-              <Code2 className="size-3.5" />
+              <Code2 className="size-3.5 shrink-0" />
               <span>Install Widget</span>
             </TabsTrigger>
             <TabsTrigger
               value="conversations"
-              className="gap-1.5 text-xs data-active:border-b-2 data-active:border-foreground data-active:bg-transparent rounded-none px-3 py-1.5"
+              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
             >
-              <MessageSquareText className="size-3.5" />
+              <MessageSquareText className="size-3.5 shrink-0" />
               <span>Conversations</span>
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="gap-1.5 text-xs data-active:border-b-2 data-active:border-foreground data-active:bg-transparent rounded-none px-3 py-1.5"
+              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
             >
-              <BarChart3 className="size-3.5" />
+              <BarChart3 className="size-3.5 shrink-0" />
               <span>Analytics</span>
             </TabsTrigger>
             <TabsTrigger
               value="settings"
-              className="gap-1.5 text-xs data-active:border-b-2 data-active:border-foreground data-active:bg-transparent rounded-none px-3 py-1.5"
+              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
             >
-              <Settings className="size-3.5" />
+              <Settings className="size-3.5 shrink-0" />
               <span>Settings</span>
             </TabsTrigger>
           </TabsList>

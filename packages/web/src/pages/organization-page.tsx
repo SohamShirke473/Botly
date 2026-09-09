@@ -155,27 +155,68 @@ export function OrganizationPage() {
           </div>
 
           {/* Organization Management Tabs */}
-          <Tabs defaultValue="manage">
-            <TabsList className="mb-4">
-              <TabsTrigger value="manage" className="gap-1.5 text-xs">
+          <Tabs defaultValue="manage" className="space-y-4">
+            <TabsList className="p-0.5 bg-muted/60 border border-border/70 rounded-lg inline-flex h-9">
+              <TabsTrigger
+                value="manage"
+                className="gap-1.5 text-xs font-medium px-3.5 h-7.5 rounded-md data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+              >
                 <Settings className="size-3.5" />
                 <span>Manage Organization</span>
               </TabsTrigger>
-              <TabsTrigger value="create" className="gap-1.5 text-xs">
+              <TabsTrigger
+                value="create"
+                className="gap-1.5 text-xs font-medium px-3.5 h-7.5 rounded-md data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+              >
                 <PlusCircle className="size-3.5" />
                 <span>Create New Org</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Tab 1: Manage Organization via Clerk */}
-            <TabsContent value="manage">
+            <TabsContent value="manage" className="mt-0">
               {organization ? (
-                <div className="flex justify-center">
-                  <OrganizationProfile routing="hash" />
+                <div className="flex justify-center w-full">
+                  <OrganizationProfile
+                    routing="hash"
+                    appearance={{
+                      elements: {
+                        rootBox: "w-full max-w-4xl mx-auto",
+                        cardBox: "w-full shadow-xs rounded-xl border border-border/80 overflow-hidden bg-card",
+                        card: "bg-card shadow-none border-0 rounded-xl",
+                        navbar: "bg-muted/40 border-r border-border/70 p-4 sm:min-w-52",
+                        navbarButton:
+                          "text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-lg transition-colors py-2 px-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold",
+                        pageScrollBox: "bg-card p-6 sm:p-8",
+                        headerTitle: "font-sans font-semibold text-foreground text-base tracking-tight",
+                        headerSubtitle: "text-muted-foreground text-xs",
+                        profileSection: "border-b border-border/60 py-4",
+                        profileSectionTitle: "text-xs font-semibold text-foreground font-sans uppercase tracking-wider",
+                        profileSectionTitleText: "text-xs font-semibold text-foreground font-sans uppercase tracking-wider",
+                        profileSectionContent: "text-xs text-muted-foreground",
+                        profileSectionPrimaryButton:
+                          "bg-background hover:bg-muted text-foreground border border-border text-xs font-medium px-3 py-1.5 rounded-lg transition-colors shadow-2xs",
+                        formButtonPrimary:
+                          "bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors",
+                        formButtonReset: "text-muted-foreground hover:text-foreground text-xs",
+                        formFieldInput:
+                          "bg-background border border-border text-foreground text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary",
+                        formFieldLabel: "text-xs text-foreground font-medium",
+                        badge: "text-xs font-mono bg-secondary text-secondary-foreground border border-border rounded-md px-2 py-0.5",
+                        membersPageInviteButton:
+                          "bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-3.5 py-1.5 rounded-lg shadow-xs transition-colors",
+                        table: "text-xs",
+                        tableHead: "text-muted-foreground font-medium border-b border-border/60",
+                        tableRow: "border-b border-border/40 hover:bg-muted/30 transition-colors",
+                        tableCell: "text-foreground text-xs py-3",
+                        footer: "hidden",
+                      },
+                    }}
+                  />
                 </div>
               ) : (
-                <Card className="p-8 text-center border-border/80">
-                  <CardTitle className="mb-2 text-base">
+                <Card className="p-8 text-center border-border/80 bg-card">
+                  <CardTitle className="mb-2 text-base font-sans font-semibold">
                     No Active Organization
                   </CardTitle>
                   <CardDescription className="mb-4 text-xs">
@@ -187,9 +228,27 @@ export function OrganizationPage() {
             </TabsContent>
 
             {/* Tab 2: Create Organization via Clerk */}
-            <TabsContent value="create">
-              <div className="flex justify-center">
-                <CreateOrganization routing="hash" />
+            <TabsContent value="create" className="mt-0">
+              <div className="flex justify-center w-full">
+                <CreateOrganization
+                  routing="hash"
+                  appearance={{
+                    elements: {
+                      rootBox: "w-full max-w-lg mx-auto",
+                      cardBox: "w-full shadow-xs rounded-xl border border-border/80 overflow-hidden bg-card",
+                      card: "bg-card shadow-none border-0 rounded-xl p-6",
+                      headerTitle: "font-sans font-semibold text-foreground text-base tracking-tight",
+                      headerSubtitle: "text-muted-foreground text-xs",
+                      formButtonPrimary:
+                        "bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors",
+                      formButtonReset: "text-muted-foreground hover:text-foreground text-xs",
+                      formFieldInput:
+                        "bg-background border border-border text-foreground text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary",
+                      formFieldLabel: "text-xs text-foreground font-medium",
+                      footer: "hidden",
+                    },
+                  }}
+                />
               </div>
             </TabsContent>
           </Tabs>

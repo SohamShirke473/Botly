@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Copy,
   Check,
-  Sparkles,
   Send,
   ArrowUpRight,
   Bot,
@@ -311,9 +310,8 @@ export function LandingPage() {
             </Link>
             <a href="#sandbox">
               <motion.div whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" size="lg" className="gap-2 text-sm px-5">
-                  <Sparkles className="size-4 text-primary" />
-                  <span>Try Live Sandbox</span>
+                <Button variant="outline" size="lg" className="text-sm px-5">
+                  Try Live Sandbox
                 </Button>
               </motion.div>
             </a>
@@ -869,7 +867,7 @@ export function LandingPage() {
       </section>
 
       {/* ─── 10. Final Hero CTA ────────────────────────────────────────────────── */}
-      <section className="py-20 sm:py-28 border-b border-border/60 bg-gradient-to-b from-card/40 to-muted/30 relative overflow-hidden">
+      <section className="py-20 sm:py-28 border-b border-border/60 bg-linear-to-b from-card/40 to-muted/30 relative overflow-hidden">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6 relative z-10">
           <Badge variant="outline" className="font-mono text-xs">
             Start Free Today
@@ -899,10 +897,19 @@ export function LandingPage() {
             </a>
           </div>
 
-          <div className="pt-4 flex items-center justify-center gap-6 text-xs text-muted-foreground font-mono">
-            <span>✓ Instant activation</span>
-            <span>✓ Unlimited testing</span>
-            <span>✓ Cancel anytime</span>
+          <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-mono">
+            <span className="flex items-center gap-1.5">
+              <Check className="size-3.5 text-status-ready" />
+              Instant activation
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="size-3.5 text-status-ready" />
+              Unlimited testing
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="size-3.5 text-status-ready" />
+              Cancel anytime
+            </span>
           </div>
         </div>
       </section>

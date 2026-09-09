@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import { Show, SignInButton } from "@clerk/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { useBotsQuery } from "@/hooks/use-api"
@@ -15,6 +14,7 @@ import {
   ArrowRight,
   Search,
   Layers,
+  X,
 } from "lucide-react"
 import { motion } from "motion/react"
 
@@ -39,23 +39,22 @@ const cardVariants = {
 
 function BotCardSkeleton() {
   return (
-    <Card className="border-border">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-10 rounded-lg" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-3 w-20" />
-            </div>
+    <div className="h-[128px] rounded-2xl border border-border/70 bg-card/60 p-4 flex flex-col justify-between">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <Skeleton className="size-10.5 rounded-xl shrink-0" />
+          <div className="space-y-1.5 flex-1">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-3 w-40" />
           </div>
-          <Skeleton className="h-5 w-16 rounded-md" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-3 w-36" />
-      </CardContent>
-    </Card>
+        <Skeleton className="h-5 w-16 rounded-full shrink-0" />
+      </div>
+      <div className="border-t border-border/50 pt-3 flex items-center justify-between">
+        <Skeleton className="h-3 w-28" />
+        <Skeleton className="h-3 w-12" />
+      </div>
+    </div>
   )
 }
 
@@ -71,7 +70,6 @@ export function BotListPage() {
     return botsQuery.data.filter(
       (b) =>
         b.name.toLowerCase().includes(q) ||
-        b.id.toLowerCase().includes(q) ||
         (b.system_prompt && b.system_prompt.toLowerCase().includes(q))
     )
   }, [botsQuery.data, search])
@@ -128,26 +126,29 @@ export function BotListPage() {
 
           {/* Search & Filter Controls */}
           {botsQuery.data && botsQuery.data.length > 0 && (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="relative flex-1 max-w-md">
-                <Search className="text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5" />
+                <Search className="text-muted-foreground/70 absolute left-3 top-1/2 -translate-y-1/2 size-4" />
                 <Input
-                  placeholder="Search bots by name or ID..."
+                  placeholder="Search bots by name..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8 h-8 text-xs bg-card"
+                  className="pl-9 pr-8 h-9 text-xs bg-card border-border/80 rounded-xl shadow-2xs focus-visible:ring-primary/20"
                 />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="text-muted-foreground hover:text-foreground absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted/60 transition-colors cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
               </div>
-              {search && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSearch("")}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Clear filter
-                </Button>
-              )}
+              <div className="text-xs text-muted-foreground font-medium">
+                Showing {filteredBots.length} of {botsQuery.data.length} {botsQuery.data.length === 1 ? "bot" : "bots"}
+              </div>
             </div>
           )}
 
@@ -216,58 +217,58 @@ export function BotListPage() {
                 <motion.div
                   key={bot.id}
                   variants={cardVariants}
-                  whileHover={{ y: -2 }}
+                  whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
                 >
                   <Link
                     to={`/dashboard/bots/${bot.id}`}
                     className="group block h-full"
                   >
-                    <Card className="h-full border-border/80 transition-colors duration-150 hover:border-foreground/30 hover:shadow-xs flex flex-col justify-between">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="bg-primary/5 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-primary/10 transition-colors group-hover:bg-primary/10">
+                    <div className="h-full rounded-2xl border border-border/80 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:shadow-md flex flex-col justify-between gap-4">
+                      {/* Top: Icon, Bot Name, Prompt snippet, Status */}
+                      <div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="bg-primary/10 text-primary flex size-10.5 shrink-0 items-center justify-center rounded-xl ring-1 ring-primary/15 transition-all duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-105 shadow-2xs">
                               <Bot className="size-5" />
                             </div>
-                            <div className="min-w-0">
-                              <CardTitle className="text-sm font-semibold truncate group-hover:text-foreground transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-sm font-semibold tracking-tight text-foreground truncate group-hover:text-primary transition-colors">
                                 {bot.name}
-                              </CardTitle>
-                              <p className="text-muted-foreground/80 font-mono text-[11px] truncate mt-0.5">
-                                {bot.id}
+                              </h3>
+                              <p className="text-muted-foreground text-xs line-clamp-1 mt-0.5 leading-relaxed">
+                                {bot.system_prompt || "Customer support AI assistant"}
                               </p>
                             </div>
                           </div>
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] font-medium bg-status-ready/10 text-status-ready shrink-0 gap-1.5"
-                          >
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-status-ready/15 px-2.5 py-0.5 text-[11px] font-medium text-status-ready border border-status-ready/20 shrink-0">
                             <span className="size-1.5 rounded-full bg-status-ready animate-pulse" />
                             Active
-                          </Badge>
-                        </div>
-                      </CardHeader>
-
-                      <CardContent className="pt-0">
-                        <div className="border-t border-border/60 pt-3 flex items-center justify-between text-muted-foreground text-xs">
-                          <div className="flex items-center gap-2">
-                          <span className="flex items-center gap-1 text-[11px]">
-                            <FileText className="size-3 text-muted-foreground/70" />
-                            {bot.system_prompt
-                              ? "Custom prompt"
-                              : "Default prompt"}
                           </span>
-                          <span className="text-border">•</span>
-                          <span className="font-mono text-[11px]">
+                        </div>
+                      </div>
+
+                      {/* Bottom: Prompt indicator, Created date, Manage link */}
+                      <div className="border-t border-border/60 pt-3 flex items-center justify-between text-muted-foreground text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="inline-flex items-center gap-1.5 text-[11px] truncate">
+                            <FileText className="size-3 text-muted-foreground/70 shrink-0" />
+                            <span className="truncate">
+                              {bot.system_prompt ? "Custom prompt" : "Default prompt"}
+                            </span>
+                          </span>
+                          <span className="text-border shrink-0">•</span>
+                          <span className="font-mono text-[11px] shrink-0">
                             {new Date(bot.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        <ArrowRight className="size-3 text-muted-foreground opacity-0 -translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0" />
+                        <div className="inline-flex items-center gap-1 text-[11px] font-medium text-primary shrink-0 opacity-85 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150">
+                          <span>Manage</span>
+                          <ArrowRight className="size-3" />
+                        </div>
                       </div>
-                    </CardContent>
-                    </Card>
+                    </div>
                   </Link>
                 </motion.div>
               ))}
