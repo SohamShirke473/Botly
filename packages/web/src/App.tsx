@@ -10,6 +10,7 @@ import { LandingPage } from "@/pages/landing-page"
 import { BotListPage } from "@/pages/bot-list-page"
 import { CreateBotPage } from "@/pages/create-bot-page"
 import { BotDetailPage } from "@/pages/bot-detail-page"
+import { TicketsPage } from "@/pages/tickets-page"
 import { SettingsPage } from "@/pages/settings-page"
 import { OrganizationPage } from "@/pages/organization-page"
 import { BillingPage } from "@/pages/billing-page"
@@ -67,6 +68,7 @@ export function App() {
               {/* Authenticated Dashboard Workspace */}
               <Route path="/dashboard" element={<RootLayout />}>
                 <Route index element={<BotListPage />} />
+                <Route path="tickets" element={<TicketsPage />} />
                 <Route path="bots/new" element={<CreateBotPage />} />
                 <Route path="bots/:id" element={<BotDetailPage />} />
                 <Route path="organization" element={<OrganizationPage />} />

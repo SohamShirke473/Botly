@@ -2,6 +2,7 @@
 /**
  * Botly - Standalone Embeddable AI Chat Widget
  * Zero dependencies, isolated styling via Shadow DOM.
+ * Supports automated AI RAG streaming + Live Human Agent Handoff via SSE.
  */
 ;(function () {
   if (window.__BOTLY_WIDGET_INITIALIZED__) return
@@ -49,6 +50,8 @@
 
   const CONVO_KEY = `botly_${botId}_convo_id`
   let activeConvoId = localStorage.getItem(CONVO_KEY) || null
+  let isHandoffActive = false
+  let eventSource = null
 
   // 3. Icons (SVG Strings)
   const ICONS = {
@@ -58,6 +61,8 @@
     close: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
     send: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 14-7-7 14-2-5Z"/></svg>`,
     botAvatar: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>`,
+    agentAvatar: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    headset: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>`,
   }
 
   // 4. Create Host Container with Shadow DOM
@@ -130,68 +135,94 @@
         height: 580px;
         max-height: calc(100vh - 120px);
         background: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
-        display: none;
+        border-radius: 18px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        display: flex;
         flex-direction: column;
         overflow: hidden;
         z-index: 999999;
-        animation: botly-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(16px) scale(0.97);
+        transform-origin: ${isRight ? "bottom right" : "bottom left"};
+        transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .botly-chat-window.open {
-        display: flex;
-      }
-      @keyframes botly-slide-up {
-        from {
-          opacity: 0;
-          transform: translateY(16px) scale(0.98);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
       }
       .botly-header {
+        padding: 14px 16px;
         background-color: ${config.theme.primaryColor};
         color: #ffffff;
-        padding: 16px 20px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        user-select: none;
       }
       .botly-header-left {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+        min-width: 0;
       }
       .botly-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
         background: rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
       }
       .botly-title {
         font-weight: 600;
-        font-size: 15px;
+        font-size: 14px;
         margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .botly-subtitle {
-        font-size: 12px;
+        font-size: 11px;
         opacity: 0.85;
-        margin: 2px 0 0 0;
+        margin: 1px 0 0 0;
         display: flex;
         align-items: center;
         gap: 5px;
       }
       .botly-online-dot {
-        width: 7px;
-        height: 7px;
+        width: 6px;
+        height: 6px;
         background: #10b981;
         border-radius: 50%;
         display: inline-block;
+      }
+      .botly-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .botly-handoff-btn {
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.15s ease;
+      }
+      .botly-handoff-btn:hover {
+        background: rgba(255, 255, 255, 0.28);
       }
       .botly-close-btn {
         background: transparent;
@@ -199,8 +230,8 @@
         color: #ffffff;
         opacity: 0.85;
         cursor: pointer;
-        padding: 6px;
-        border-radius: 8px;
+        padding: 5px;
+        border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -213,7 +244,7 @@
       .botly-messages {
         flex: 1;
         overflow-y: auto;
-        padding: 20px 16px;
+        padding: 16px;
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -222,13 +253,14 @@
       .botly-msg-row {
         display: flex;
         gap: 8px;
-        max-width: 86%;
+        max-width: 88%;
       }
       .botly-msg-row.user {
         align-self: flex-end;
         flex-direction: row-reverse;
       }
-      .botly-msg-row.assistant {
+      .botly-msg-row.assistant,
+      .botly-msg-row.agent {
         align-self: flex-start;
       }
       .botly-msg-avatar {
@@ -242,10 +274,25 @@
         justify-content: center;
         flex-shrink: 0;
         font-size: 10px;
+        margin-top: 2px;
+      }
+      .botly-msg-avatar.agent {
+        background-color: #0284c7;
+      }
+      .botly-bubble-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .botly-sender-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #0284c7;
+        padding-left: 2px;
       }
       .botly-bubble {
-        padding: 10px 14px;
-        border-radius: 16px;
+        padding: 9px 13px;
+        border-radius: 14px;
         font-size: 13.5px;
         line-height: 1.45;
         word-break: break-word;
@@ -262,6 +309,25 @@
         border: 1px solid #e5e7eb;
         border-top-left-radius: 4px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+      .botly-msg-row.agent .botly-bubble {
+        background-color: #f0f9ff;
+        color: #0c4a6e;
+        border: 1px solid #bae6fd;
+        border-top-left-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+      .botly-status-banner {
+        align-self: center;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #065f46;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        text-align: center;
+        max-width: 90%;
+        margin: 4px 0;
       }
       .botly-inline-code {
         background: rgba(0, 0, 0, 0.07);
@@ -295,7 +361,7 @@
         40% { transform: scale(1); }
       }
       .botly-input-area {
-        padding: 12px 16px 14px;
+        padding: 12px 14px;
         background: #ffffff;
         border-top: 1px solid #f3f4f6;
       }
@@ -303,16 +369,14 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        background: #f3f4f6;
-        border-radius: 12px;
-        padding: 4px 6px 4px 14px;
-        border: 1px solid transparent;
-        transition: border 0.15s ease, background 0.15s ease;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 3px 6px 3px 12px;
+        transition: border-color 0.15s ease;
       }
       .botly-form:focus-within {
-        background: #ffffff;
         border-color: ${config.theme.primaryColor};
-        box-shadow: 0 0 0 2px ${config.theme.primaryColor}20;
       }
       .botly-input {
         flex: 1;
@@ -321,11 +385,11 @@
         outline: none;
         font-size: 13.5px;
         color: #111827;
-        padding: 8px 0;
+        padding: 6px 0;
       }
       .botly-send-btn {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         border-radius: 8px;
         background-color: ${config.theme.primaryColor};
         color: #ffffff;
@@ -349,14 +413,95 @@
       }
       .botly-branding {
         text-align: center;
-        font-size: 11px;
+        font-size: 10.5px;
         color: #9ca3af;
-        margin-top: 8px;
+        margin-top: 6px;
       }
-      .botly-branding a {
+      /* Handoff Modal Overlay */
+      .botly-modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(2px);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .botly-modal-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .botly-modal-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 18px;
+        width: 100%;
+        max-width: 310px;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+      }
+      .botly-modal-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+        margin: 0 0 4px 0;
+      }
+      .botly-modal-desc {
+        font-size: 11.5px;
         color: #6b7280;
-        text-decoration: none;
+        line-height: 1.4;
+        margin: 0 0 12px 0;
+      }
+      .botly-field {
+        margin-bottom: 10px;
+      }
+      .botly-field label {
+        display: block;
+        font-size: 11px;
         font-weight: 500;
+        color: #374151;
+        margin-bottom: 4px;
+      }
+      .botly-field input {
+        width: 100%;
+        padding: 6px 10px;
+        font-size: 12.5px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        outline: none;
+      }
+      .botly-field input:focus {
+        border-color: ${config.theme.primaryColor};
+      }
+      .botly-modal-btns {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .botly-btn-primary {
+        flex: 1;
+        background-color: ${config.theme.primaryColor};
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        padding: 7px 12px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .botly-btn-secondary {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: none;
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
       }
       .botly-h1 { display: block; font-size: 15px; font-weight: 700; margin: 6px 0 2px; }
       .botly-h2 { display: block; font-size: 14px; font-weight: 700; margin: 5px 0 2px; }
@@ -388,7 +533,6 @@
 
     let html = escapeHtml(rawText)
 
-    // Headings: #### before ### before ## before # (most specific first)
     html = html.replace(/^######\s+(.+)$/gm, '<span class="botly-h6">$1</span>')
     html = html.replace(/^#####\s+(.+)$/gm, '<span class="botly-h5">$1</span>')
     html = html.replace(/^####\s+(.+)$/gm, '<span class="botly-h4">$1</span>')
@@ -396,36 +540,26 @@
     html = html.replace(/^##\s+(.+)$/gm, '<span class="botly-h2">$1</span>')
     html = html.replace(/^#\s+(.+)$/gm, '<span class="botly-h1">$1</span>')
 
-    // Horizontal rule
     html = html.replace(/^[-*]{3,}$/gm, '<hr class="botly-hr">')
 
-    // Bold and italic
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     html = html.replace(/__(.*?)__/g, '<strong>$1</strong>')
     html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
     html = html.replace(/_([^_\n]+)_/g, '<em>$1</em>')
 
-    // Inline code
     html = html.replace(/`([^`]+)`/g, '<code class="botly-inline-code">$1</code>')
 
-    // Links
     html = html.replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="botly-link">$1</a>'
     )
 
-    // Ordered lists: preserve the number
     html = html.replace(/(?:^|\n)(\d+)\.\s+(.+)/g,
       '<br><span class="botly-ol-item"><span class="botly-ol-num">$1.</span>\u00a0$2</span>'
     )
 
-    // Unordered lists
     html = html.replace(/(?:^|\n)[-*]\s+(.+)/g, '<br><span class="botly-li">\u2022\u00a0$1</span>')
-
-    // Remaining newlines
     html = html.replace(/\n/g, '<br>')
-
-    // Clean up <br> immediately before a heading span
     html = html.replace(/(<br\s*\/?>)+(<span class="botly-h)/g, '<br>$2')
 
     return html
@@ -449,7 +583,13 @@
           <p class="botly-subtitle"><span class="botly-online-dot"></span> Online</p>
         </div>
       </div>
-      <button class="botly-close-btn" aria-label="Close Chat">${ICONS.close}</button>
+      <div class="botly-header-actions">
+        <button class="botly-handoff-btn" title="Talk to a human support agent">
+          ${ICONS.headset}
+          <span>Human</span>
+        </button>
+        <button class="botly-close-btn" aria-label="Close Chat">${ICONS.close}</button>
+      </div>
     </div>
     <div class="botly-messages"></div>
     <div class="botly-input-area">
@@ -463,6 +603,28 @@
           : ""
       }
     </div>
+
+    <!-- Handoff Contact Modal -->
+    <div class="botly-modal-overlay">
+      <div class="botly-modal-card">
+        <h4 class="botly-modal-title">Connect with Human Support</h4>
+        <p class="botly-modal-desc">Leave your email so our team can follow up if you close the chat.</p>
+        <form class="botly-handoff-form">
+          <div class="botly-field">
+            <label>Your Name</label>
+            <input type="text" class="botly-handoff-name" placeholder="Alex Smith" />
+          </div>
+          <div class="botly-field">
+            <label>Your Email</label>
+            <input type="email" class="botly-handoff-email" placeholder="alex@example.com" />
+          </div>
+          <div class="botly-modal-btns">
+            <button type="button" class="botly-btn-secondary botly-handoff-skip">Skip</button>
+            <button type="submit" class="botly-btn-primary botly-handoff-submit">Request Agent</button>
+          </div>
+        </form>
+      </div>
+    </div>
   `
 
   shadow.appendChild(bubbleBtn)
@@ -474,6 +636,12 @@
   const sendBtn = chatWindow.querySelector(".botly-send-btn")
   const closeBtn = chatWindow.querySelector(".botly-close-btn")
   const titleEl = chatWindow.querySelector(".botly-title")
+  const handoffBtn = chatWindow.querySelector(".botly-handoff-btn")
+  const modalOverlay = chatWindow.querySelector(".botly-modal-overlay")
+  const handoffForm = chatWindow.querySelector(".botly-handoff-form")
+  const handoffName = chatWindow.querySelector(".botly-handoff-name")
+  const handoffEmail = chatWindow.querySelector(".botly-handoff-email")
+  const handoffSkip = chatWindow.querySelector(".botly-handoff-skip")
 
   // Toggle Window
   let isOpen = false
@@ -484,6 +652,7 @@
       bubbleBtn.innerHTML = ICONS.close
       input.focus()
       scrollToBottom()
+      if (activeConvoId) connectEventStream(activeConvoId)
     } else {
       chatWindow.classList.remove("open")
       bubbleBtn.innerHTML = ICONS[config.theme.bubbleIcon] || ICONS.chat
@@ -497,7 +666,15 @@
     messagesContainer.scrollTop = messagesContainer.scrollHeight
   }
 
-  function appendMessage(role, text) {
+  function appendStatusBanner(text) {
+    const banner = document.createElement("div")
+    banner.className = "botly-status-banner"
+    banner.textContent = text
+    messagesContainer.appendChild(banner)
+    scrollToBottom()
+  }
+
+  function appendMessage(role, text, senderName) {
     const row = document.createElement("div")
     row.className = `botly-msg-row ${role}`
 
@@ -506,23 +683,140 @@
       avatar.className = "botly-msg-avatar"
       avatar.innerHTML = ICONS.botAvatar
       row.appendChild(avatar)
+    } else if (role === "agent") {
+      const avatar = document.createElement("div")
+      avatar.className = "botly-msg-avatar agent"
+      avatar.innerHTML = ICONS.agentAvatar
+      row.appendChild(avatar)
+    }
+
+    const wrapper = document.createElement("div")
+    wrapper.className = "botly-bubble-wrapper"
+
+    if (role === "agent" && senderName) {
+      const label = document.createElement("span")
+      label.className = "botly-sender-label"
+      label.textContent = senderName
+      wrapper.appendChild(label)
     }
 
     const bubble = document.createElement("div")
     bubble.className = "botly-bubble"
-    if (role === "assistant") {
+    if (role === "assistant" || role === "agent") {
       bubble.innerHTML = renderMarkdown(text)
     } else {
       bubble.textContent = text
     }
-    row.appendChild(bubble)
+    wrapper.appendChild(bubble)
+    row.appendChild(wrapper)
 
     messagesContainer.appendChild(row)
     scrollToBottom()
     return bubble
   }
 
-  // 8. Fetch Bot Configuration
+  // 8. Persistent SSE Stream for Real-Time Agent Replies
+  function connectEventStream(convoId) {
+    if (eventSource || !window.EventSource) return
+
+    try {
+      eventSource = new EventSource(
+        `${apiUrl}/api/chat/${botId}/conversations/${convoId}/events`
+      )
+
+      eventSource.addEventListener("agent_message", (e) => {
+        try {
+          const msg = JSON.parse(e.data)
+          appendMessage("agent", msg.content, msg.sender_name || "Support Agent")
+        } catch {}
+      })
+
+      eventSource.addEventListener("handoff_status", (e) => {
+        try {
+          const data = JSON.parse(e.data)
+          if (data.message) appendStatusBanner(data.message)
+          if (data.status === "resolved") {
+            isHandoffActive = false
+            input.placeholder = config.placeholder
+          } else if (data.status === "waiting_agent" || data.status === "agent_active") {
+            isHandoffActive = true
+            input.placeholder = "Message support agent..."
+          }
+        } catch {}
+      })
+
+      eventSource.onerror = () => {
+        // Browser automatically attempts reconnect
+      }
+    } catch (err) {
+      console.warn("[Botly] Could not connect to SSE events:", err)
+    }
+  }
+
+  // 9. Human Handoff Modal Triggers
+  handoffBtn.addEventListener("click", () => {
+    modalOverlay.classList.add("open")
+  })
+
+  function submitHandoff(name, email) {
+    modalOverlay.classList.remove("open")
+
+    const doHandoff = (convoId) => {
+      fetch(`${apiUrl}/api/chat/${botId}/conversations/${convoId}/handoff`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visitorName: name || undefined,
+          visitorEmail: email || undefined,
+        }),
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          isHandoffActive = true
+          input.placeholder = "Message support agent..."
+          appendStatusBanner(
+            "Connecting you with a support agent. You can continue typing below."
+          )
+          connectEventStream(convoId)
+        })
+        .catch(() => {
+          appendStatusBanner("Failed to request human support. Please try again.")
+        })
+    }
+
+    if (!activeConvoId) {
+      fetch(`${apiUrl}/api/chat/${botId}/conversations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId }),
+      })
+        .then((r) => r.json())
+        .then((convo) => {
+          activeConvoId = convo.id
+          localStorage.setItem(CONVO_KEY, activeConvoId)
+          doHandoff(convo.id)
+        })
+    } else {
+      doHandoff(activeConvoId)
+    }
+  }
+
+  handoffForm.addEventListener("submit", (e) => {
+    e.preventDefault()
+    submitHandoff(handoffName.value.trim(), handoffEmail.value.trim())
+  })
+
+  handoffSkip.addEventListener("click", () => {
+    submitHandoff("", "")
+  })
+
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) {
+      modalOverlay.classList.remove("open")
+    }
+  })
+
+  // 10. Fetch Bot Configuration
   fetch(`${apiUrl}/api/chat/${botId}/config`)
     .then((res) => (res.ok ? res.json() : null))
     .then((data) => {
@@ -537,12 +831,13 @@
 
       updateStyles()
       titleEl.textContent = config.name
-      input.placeholder = config.placeholder
+      input.placeholder = isHandoffActive
+        ? "Message support agent..."
+        : config.placeholder
       bubbleBtn.innerHTML = isOpen
         ? ICONS.close
         : ICONS[config.theme.bubbleIcon] || ICONS.chat
 
-      // If no messages yet, show greeting
       if (messagesContainer.children.length === 0) {
         appendMessage("assistant", config.greeting)
       }
@@ -554,7 +849,7 @@
       }
     })
 
-  // 9. Load History if Conversation Exists
+  // 11. Load History if Conversation Exists
   if (activeConvoId) {
     fetch(`${apiUrl}/api/chat/${botId}/conversations/${activeConvoId}/messages`)
       .then((res) => (res.ok ? res.json() : []))
@@ -562,14 +857,15 @@
         if (Array.isArray(messages) && messages.length > 0) {
           messagesContainer.innerHTML = ""
           messages.forEach((msg) => {
-            appendMessage(msg.role, msg.content)
+            appendMessage(msg.role, msg.content, msg.sender_name)
           })
+          connectEventStream(activeConvoId)
         }
       })
       .catch(() => {})
   }
 
-  // 10. Handle Sending Messages & SSE Streaming
+  // 12. Handle Sending Messages & SSE Streaming
   form.addEventListener("submit", async (e) => {
     e.preventDefault()
     const userText = input.value.trim()
@@ -578,20 +874,27 @@
     input.value = ""
     appendMessage("user", userText)
 
-    // Create assistant streaming placeholder
-    const row = document.createElement("div")
-    row.className = "botly-msg-row assistant"
-    const avatar = document.createElement("div")
-    avatar.className = "botly-msg-avatar"
-    avatar.innerHTML = ICONS.botAvatar
-    row.appendChild(avatar)
+    // Create assistant streaming placeholder only if not in active handoff
+    let bubble = null
+    if (!isHandoffActive) {
+      const row = document.createElement("div")
+      row.className = "botly-msg-row assistant"
+      const avatar = document.createElement("div")
+      avatar.className = "botly-msg-avatar"
+      avatar.innerHTML = ICONS.botAvatar
+      row.appendChild(avatar)
 
-    const bubble = document.createElement("div")
-    bubble.className = "botly-bubble"
-    bubble.innerHTML = `<div class="botly-typing"><span></span><span></span><span></span></div>`
-    row.appendChild(bubble)
-    messagesContainer.appendChild(row)
-    scrollToBottom()
+      const wrapper = document.createElement("div")
+      wrapper.className = "botly-bubble-wrapper"
+      bubble = document.createElement("div")
+      bubble.className = "botly-bubble"
+      bubble.innerHTML = `<span class="botly-typing"><span></span><span></span><span></span></span>`
+      wrapper.appendChild(bubble)
+      row.appendChild(wrapper)
+
+      messagesContainer.appendChild(row)
+      scrollToBottom()
+    }
 
     sendBtn.disabled = true
 
@@ -639,7 +942,16 @@
             if (eventData.type === "meta" && eventData.conversationId) {
               activeConvoId = eventData.conversationId
               localStorage.setItem(CONVO_KEY, activeConvoId)
-            } else if (eventData.type === "delta" && eventData.text) {
+              connectEventStream(activeConvoId)
+            } else if (eventData.type === "status") {
+              if (eventData.status === "waiting_agent" || eventData.status === "agent_active") {
+                isHandoffActive = true
+                input.placeholder = "Message support agent..."
+              }
+              if (eventData.message) {
+                appendStatusBanner(eventData.message)
+              }
+            } else if (eventData.type === "delta" && eventData.text && bubble) {
               if (!hasReceivedFirstToken) {
                 bubble.textContent = ""
                 hasReceivedFirstToken = true
@@ -647,7 +959,7 @@
               accumulatedText += eventData.text
               bubble.innerHTML = renderMarkdown(accumulatedText)
               scrollToBottom()
-            } else if (eventData.type === "error") {
+            } else if (eventData.type === "error" && bubble) {
               bubble.textContent =
                 eventData.message || "Something went wrong generating a response."
             }
@@ -658,11 +970,12 @@
       }
     } catch (err) {
       console.error("[Botly] Chat send error:", err)
-      bubble.textContent =
-        "Sorry, I was unable to connect. Please try again in a moment."
+      if (bubble) {
+        bubble.textContent = "Could not deliver message. Please check your connection."
+      }
     } finally {
       sendBtn.disabled = false
-      scrollToBottom()
+      input.focus()
     }
   })
 })()

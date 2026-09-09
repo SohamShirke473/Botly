@@ -23,7 +23,9 @@ import {
   analyticsRouter,
   directConversationsRouter,
 } from "./routes/analytics"
+import { ticketsRouter } from "./routes/tickets"
 import { internalRouter } from "./routes/internal"
+import { initAdminWebSocketServer } from "./lib/realtime"
 
 import { logger } from "./lib/logger"
 export { logger }
@@ -225,6 +227,9 @@ app.use("/api/chat", chatRouter)
 app.use("/api/bots", analyticsRouter)
 app.use("/api/conversations", directConversationsRouter)
 
+// Tickets & Human Handoff routes: /api/tickets
+app.use("/api/tickets", ticketsRouter)
+
 // Worker Internal routes: /internal/documents/:docId/status
 app.use("/internal", internalRouter)
 
@@ -249,21 +254,28 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 })
 
 // --- Server Lifecycle ---
-const server = app.listen(PORT, () => {
-  logger.info(`🚀 Botly API Server running on http://localhost:${PORT}`)
-  logger.info(`   Health check: http://localhost:${PORT}/api/health`)
-  logger.info(`   Widget script: http://localhost:${PORT}/widget.js`)
-})
+let server: ReturnType<typeof app.listen> | null = null
 
-const shutdown = (signal: string) => {
-  logger.info(`Received ${signal}. Closing HTTP server gracefully...`)
-  server.close(() => {
-    logger.info("HTTP server closed. Exiting process.")
-    process.exit(0)
+if (process.env.NODE_ENV !== "test") {
+  server = app.listen(PORT, () => {
+    logger.info(`🚀 Botly API Server running on http://localhost:${PORT}`)
+    logger.info(`   Health check: http://localhost:${PORT}/api/health`)
+    logger.info(`   Widget script: http://localhost:${PORT}/widget.js`)
   })
-}
 
-process.on("SIGTERM", () => shutdown("SIGTERM"))
-process.on("SIGINT", () => shutdown("SIGINT"))
+  // Attach Admin WebSocket server to HTTP server
+  initAdminWebSocketServer(server)
+
+  const shutdown = (signal: string) => {
+    logger.info(`Received ${signal}. Closing HTTP server gracefully...`)
+    server?.close(() => {
+      logger.info("HTTP server closed. Exiting process.")
+      process.exit(0)
+    })
+  }
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"))
+  process.on("SIGINT", () => shutdown("SIGINT"))
+}
 
 export default app
