@@ -14,15 +14,9 @@ import { inngest, functions } from "@botly/inngest"
 import type { HealthCheckResponse, MessageResponse } from "types"
 
 import { botsRouter } from "./routes/bots"
-import {
-  documentsRouter,
-  botDocumentsRouter,
-} from "./routes/documents"
+import { documentsRouter, botDocumentsRouter } from "./routes/documents"
 import { chatRouter } from "./routes/chat"
-import {
-  analyticsRouter,
-  directConversationsRouter,
-} from "./routes/analytics"
+import { analyticsRouter, directConversationsRouter } from "./routes/analytics"
 import { ticketsRouter } from "./routes/tickets"
 import { internalRouter } from "./routes/internal"
 import { initAdminWebSocketServer } from "./lib/realtime"

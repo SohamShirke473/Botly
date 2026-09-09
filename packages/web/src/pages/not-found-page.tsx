@@ -5,16 +5,16 @@ import { Bot, ArrowLeft } from "lucide-react"
 export function NotFoundPage() {
   return (
     <div className="mx-auto flex min-h-[65vh] max-w-md flex-col items-center justify-center px-4 text-center">
-      <div className="bg-primary/5 text-primary mb-3.5 flex size-12 items-center justify-center rounded-xl ring-1 ring-primary/10">
+      <div className="bg-primary/5 text-primary ring-primary/10 mb-3.5 flex size-12 items-center justify-center rounded-xl ring-1">
         <Bot className="size-6" />
       </div>
-      <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-1">
+      <div className="text-muted-foreground mb-1 font-mono text-xs tracking-wider uppercase">
         404 Not Found
       </div>
-      <h1 className="text-xl font-bold tracking-tight text-foreground">
+      <h1 className="text-foreground text-xl font-bold tracking-tight">
         Page does not exist
       </h1>
-      <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed max-w-xs">
+      <p className="text-muted-foreground mt-1.5 max-w-xs text-xs leading-relaxed">
         The destination you navigated to is not available or has been moved.
       </p>
 

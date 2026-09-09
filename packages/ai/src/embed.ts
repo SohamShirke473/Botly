@@ -93,4 +93,3 @@ export async function embedManyTexts(
     usage: { tokens: totalTokens },
   }
 }
-

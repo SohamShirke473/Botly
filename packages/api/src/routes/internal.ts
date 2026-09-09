@@ -3,10 +3,7 @@ import { db } from "db"
 import { documents } from "db/schema"
 import { eq } from "drizzle-orm"
 import { validate } from "../middleware/validate"
-import {
-  DocIdParamSchema,
-  DocumentStatusUpdateSchema,
-} from "types"
+import { DocIdParamSchema, DocumentStatusUpdateSchema } from "types"
 
 export const internalRouter = Router()
 
@@ -14,7 +11,11 @@ export const internalRouter = Router()
  * Authentication middleware for internal worker routes.
  * Requires a valid x-internal-secret header.
  */
-function requireInternalAuth(req: Request, res: Response, next: NextFunction): void {
+function requireInternalAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
   const expectedSecret = process.env.INTERNAL_API_SECRET
   if (!expectedSecret) {
     throw new Error("INTERNAL_API_SECRET env var is required")

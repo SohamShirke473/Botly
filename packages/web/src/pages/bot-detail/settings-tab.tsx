@@ -111,21 +111,22 @@ export function SettingsTab({ bot }: { bot: Bot }) {
     <div className="space-y-6">
       {/* Widget Customization + Real-Time Simulator */}
       <Card className="border-border/80 shadow-xs">
-        <CardHeader className="border-b border-border/60 pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <CardHeader className="border-border/60 border-b pb-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold text-foreground">
+              <CardTitle className="text-foreground text-sm font-semibold">
                 Widget Customization & Live Preview
               </CardTitle>
               <CardDescription className="text-xs">
-                Fine-tune theme colors, copy, and launcher position with real-time visual feedback.
+                Fine-tune theme colors, copy, and launcher position with
+                real-time visual feedback.
               </CardDescription>
             </div>
             <Button
               size="sm"
               disabled={!hasConfigChanges || updateConfig.isPending}
               onClick={handleSaveConfig}
-              className="gap-1.5 shadow-xs shrink-0 self-start sm:self-auto"
+              className="shrink-0 gap-1.5 self-start shadow-xs sm:self-auto"
             >
               {updateConfig.isPending ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -137,16 +138,16 @@ export function SettingsTab({ bot }: { bot: Bot }) {
           </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <WidgetConfigForm value={config} onChange={handleConfigChange} />
             </div>
-            <div className="lg:col-span-5 lg:sticky lg:top-16">
+            <div className="lg:sticky lg:top-16 lg:col-span-5">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
                   Live Preview
                 </span>
-                <span className="text-[11px] font-mono text-muted-foreground/80">
+                <span className="text-muted-foreground/80 font-mono text-[11px]">
                   {hasConfigChanges ? "Unsaved changes" : "Saved"}
                 </span>
               </div>
@@ -159,11 +160,12 @@ export function SettingsTab({ bot }: { bot: Bot }) {
       {/* System Prompt Instructions */}
       <Card className="border-border/80 shadow-xs">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-foreground">
+          <CardTitle className="text-foreground text-sm font-semibold">
             System Instructions
           </CardTitle>
           <CardDescription className="text-xs">
-            Instructions that define how the assistant reasons and responds to visitors.
+            Instructions that define how the assistant reasons and responds to
+            visitors.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -175,14 +177,14 @@ export function SettingsTab({ bot }: { bot: Bot }) {
             }}
             rows={5}
             maxLength={4000}
-            className="text-xs leading-relaxed font-mono text-[12px] bg-background"
+            className="bg-background font-mono text-xs text-[12px] leading-relaxed"
           />
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono">
+          <div className="text-muted-foreground flex items-center justify-between font-mono text-[11px]">
             <span>Grounding instructions & response boundaries</span>
             <span>{systemPrompt.length} / 4000</span>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end border-t border-border/60 bg-muted/20 px-6 py-3">
+        <CardFooter className="border-border/60 bg-muted/20 flex justify-end border-t px-6 py-3">
           <Button
             size="sm"
             variant="outline"
@@ -202,15 +204,15 @@ export function SettingsTab({ bot }: { bot: Bot }) {
       <Card className="border-destructive/30 bg-destructive/5 shadow-xs">
         <CardHeader>
           <CardTitle className="text-destructive flex items-center gap-2 text-sm font-semibold">
-            <AlertTriangle className="size-4 text-destructive" />
+            <AlertTriangle className="text-destructive size-4" />
             <span>Danger Zone</span>
           </CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Permanently delete this bot and all indexed documents, vector embeddings,
-            and conversation transcripts.
+          <CardDescription className="text-muted-foreground text-xs">
+            Permanently delete this bot and all indexed documents, vector
+            embeddings, and conversation transcripts.
           </CardDescription>
         </CardHeader>
-        <CardFooter className="border-t border-destructive/20 pt-3">
+        <CardFooter className="border-destructive/20 border-t pt-3">
           <Button
             variant="destructive"
             size="sm"
@@ -227,25 +229,25 @@ export function SettingsTab({ bot }: { bot: Bot }) {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-base text-foreground">
+            <DialogTitle className="text-foreground text-base">
               Delete Bot
             </DialogTitle>
-            <DialogDescription className="text-xs leading-relaxed text-muted-foreground">
-              This will permanently delete <strong>{bot.name}</strong> along with
-              all associated vector records and conversations. This action cannot
-              be reversed.
+            <DialogDescription className="text-muted-foreground text-xs leading-relaxed">
+              This will permanently delete <strong>{bot.name}</strong> along
+              with all associated vector records and conversations. This action
+              cannot be reversed.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-2 py-2">
-            <Label className="text-xs text-foreground">
+            <Label className="text-foreground text-xs">
               Please type <strong>{bot.name}</strong> to confirm:
             </Label>
             <Input
               value={deleteConfirm}
               onChange={(e) => setDeleteConfirm(e.target.value)}
               placeholder={bot.name}
-              className="h-8.5 text-xs font-mono"
+              className="h-8.5 font-mono text-xs"
             />
           </div>
 

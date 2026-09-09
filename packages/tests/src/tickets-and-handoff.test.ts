@@ -1,8 +1,15 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
-import { startTestServer, stopTestServer, getBaseUrl, authHeaders, TEST_ORG_ID } from "./setup"
+import {
+  startTestServer,
+  stopTestServer,
+  getBaseUrl,
+  authHeaders,
+  TEST_ORG_ID,
+} from "./setup"
 import { db } from "db"
 import { bots, conversations, messages, tickets } from "db/schema"
 import { eq } from "drizzle-orm"
+import type { Ticket } from "types"
 
 describe("Support Tickets & Real-Time Human Handoff Routes", () => {
   let botId = ""
@@ -38,7 +45,8 @@ describe("Support Tickets & Real-Time Human Handoff Routes", () => {
     await db.insert(messages).values({
       conversationId,
       role: "user",
-      content: "I need help with my account billing, please connect me to a human agent.",
+      content:
+        "I need help with my account billing, please connect me to a human agent.",
     })
   })
 
@@ -109,7 +117,7 @@ describe("Support Tickets & Real-Time Human Handoff Routes", () => {
     const ticketList = await res.json()
     expect(Array.isArray(ticketList)).toBe(true)
 
-    const found = ticketList.find((t: any) => t.id === ticketId)
+    const found = ticketList.find((t: Ticket) => t.id === ticketId)
     expect(found).toBeDefined()
     expect(found.status).toBe("open")
     expect(found.visitor_name).toBe("Jane Doe")
@@ -131,13 +139,16 @@ describe("Support Tickets & Real-Time Human Handoff Routes", () => {
   })
 
   it("POST /api/tickets/:id/messages allows support agent to reply directly", async () => {
-    const res = await fetch(`${getBaseUrl()}/api/tickets/${ticketId}/messages`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({
-        content: "Hello Jane! I am taking a look at your billing now.",
-      }),
-    })
+    const res = await fetch(
+      `${getBaseUrl()}/api/tickets/${ticketId}/messages`,
+      {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({
+          content: "Hello Jane! I am taking a look at your billing now.",
+        }),
+      }
+    )
 
     expect(res.status).toBe(201)
     const msg = await res.json()

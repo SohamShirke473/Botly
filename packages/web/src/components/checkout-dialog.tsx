@@ -54,38 +54,48 @@ export function CheckoutDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-w-md">
+      <DialogContent className="max-w-md sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-lg ring-1 ring-primary/20">
+          <div className="mb-1 flex items-center gap-2">
+            <div className="bg-primary/10 text-primary ring-primary/20 flex size-8 items-center justify-center rounded-lg ring-1">
               <CreditCard className="size-4" />
             </div>
-            <DialogTitle className="text-base font-semibold text-foreground">
+            <DialogTitle className="text-foreground text-base font-semibold">
               Upgrade to {planName}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            Unlock 10 active bots, unlimited vector documents, and priority indexing.
+          <DialogDescription className="text-muted-foreground text-xs leading-relaxed">
+            Unlock 10 active bots, unlimited vector documents, and priority
+            indexing.
           </DialogDescription>
         </DialogHeader>
 
         {/* Plan Summary Pill */}
-        <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5 flex items-center justify-between">
+        <div className="border-border/70 bg-muted/30 flex items-center justify-between rounded-xl border p-3.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm text-foreground">{planName} Plan</span>
-              <Badge variant="secondary" className="text-[10px] font-mono capitalize">
+              <span className="text-foreground text-sm font-semibold">
+                {planName} Plan
+              </span>
+              <Badge
+                variant="secondary"
+                className="font-mono text-[10px] capitalize"
+              >
                 {billingPeriod}
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Billed {billingPeriod === "annual" ? "annually (20% discount)" : "monthly"} • Cancel anytime
+            <p className="text-muted-foreground mt-0.5 text-xs">
+              Billed{" "}
+              {billingPeriod === "annual"
+                ? "annually (20% discount)"
+                : "monthly"}{" "}
+              • Cancel anytime
             </p>
           </div>
           <div className="text-right">
-            <div className="text-base font-bold text-foreground">
+            <div className="text-foreground text-base font-bold">
               {price}
-              <span className="text-xs font-normal text-muted-foreground">
+              <span className="text-muted-foreground text-xs font-normal">
                 /{billingPeriod === "annual" ? "yr" : "mo"}
               </span>
             </div>
@@ -113,13 +123,13 @@ export function CheckoutDialog({
               Card Number (Simulated)
             </Label>
             <div className="relative">
-              <CreditCard className="text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5" />
+              <CreditCard className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
               <Input
                 id="card-number"
                 value={cardNumber}
                 onChange={(e) => setCardNumber(e.target.value)}
                 placeholder="4242 •••• •••• 4242"
-                className="pl-8 h-8.5 text-xs font-mono"
+                className="h-8.5 pl-8 font-mono text-xs"
                 required
               />
             </div>
@@ -135,7 +145,7 @@ export function CheckoutDialog({
                 value={expiry}
                 onChange={(e) => setExpiry(e.target.value)}
                 placeholder="MM/YY"
-                className="h-8.5 text-xs font-mono text-center"
+                className="h-8.5 text-center font-mono text-xs"
                 required
               />
             </div>
@@ -148,18 +158,18 @@ export function CheckoutDialog({
                 value={cvc}
                 onChange={(e) => setCvc(e.target.value)}
                 placeholder="123"
-                className="h-8.5 text-xs font-mono text-center"
+                className="h-8.5 text-center font-mono text-xs"
                 required
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-1 text-[11px] text-muted-foreground">
-            <ShieldCheck className="size-3.5 text-status-ready shrink-0" />
+          <div className="text-muted-foreground flex items-center gap-2 pt-1 text-[11px]">
+            <ShieldCheck className="text-status-ready size-3.5 shrink-0" />
             <span>Simulated test mode • No real payment processor charged</span>
           </div>
 
-          <DialogFooter className="pt-2 gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 pt-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"

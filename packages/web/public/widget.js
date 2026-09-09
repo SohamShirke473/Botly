@@ -10,8 +10,7 @@
 
   // 1. Locate current script tag and extract parameters
   const scriptTag =
-    document.currentScript ||
-    document.querySelector("script[data-bot-id]")
+    document.currentScript || document.querySelector("script[data-bot-id]")
 
   if (!scriptTag) {
     console.error("[Botly] Could not find <script data-bot-id='...'> element.")
@@ -542,25 +541,32 @@
 
     html = html.replace(/^[-*]{3,}$/gm, '<hr class="botly-hr">')
 
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    html = html.replace(/__(.*?)__/g, '<strong>$1</strong>')
-    html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
-    html = html.replace(/_([^_\n]+)_/g, '<em>$1</em>')
+    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    html = html.replace(/__(.*?)__/g, "<strong>$1</strong>")
+    html = html.replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
+    html = html.replace(/_([^_\n]+)_/g, "<em>$1</em>")
 
-    html = html.replace(/`([^`]+)`/g, '<code class="botly-inline-code">$1</code>')
+    html = html.replace(
+      /`([^`]+)`/g,
+      '<code class="botly-inline-code">$1</code>'
+    )
 
     html = html.replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer" class="botly-link">$1</a>'
     )
 
-    html = html.replace(/(?:^|\n)(\d+)\.\s+(.+)/g,
+    html = html.replace(
+      /(?:^|\n)(\d+)\.\s+(.+)/g,
       '<br><span class="botly-ol-item"><span class="botly-ol-num">$1.</span>\u00a0$2</span>'
     )
 
-    html = html.replace(/(?:^|\n)[-*]\s+(.+)/g, '<br><span class="botly-li">\u2022\u00a0$1</span>')
-    html = html.replace(/\n/g, '<br>')
-    html = html.replace(/(<br\s*\/?>)+(<span class="botly-h)/g, '<br>$2')
+    html = html.replace(
+      /(?:^|\n)[-*]\s+(.+)/g,
+      '<br><span class="botly-li">\u2022\u00a0$1</span>'
+    )
+    html = html.replace(/\n/g, "<br>")
+    html = html.replace(/(<br\s*\/?>)+(<span class="botly-h)/g, "<br>$2")
 
     return html
   }
@@ -727,7 +733,11 @@
       eventSource.addEventListener("agent_message", (e) => {
         try {
           const msg = JSON.parse(e.data)
-          appendMessage("agent", msg.content, msg.sender_name || "Support Agent")
+          appendMessage(
+            "agent",
+            msg.content,
+            msg.sender_name || "Support Agent"
+          )
         } catch {}
       })
 
@@ -738,7 +748,10 @@
           if (data.status === "resolved") {
             isHandoffActive = false
             input.placeholder = config.placeholder
-          } else if (data.status === "waiting_agent" || data.status === "agent_active") {
+          } else if (
+            data.status === "waiting_agent" ||
+            data.status === "agent_active"
+          ) {
             isHandoffActive = true
             input.placeholder = "Message support agent..."
           }
@@ -780,7 +793,9 @@
           connectEventStream(convoId)
         })
         .catch(() => {
-          appendStatusBanner("Failed to request human support. Please try again.")
+          appendStatusBanner(
+            "Failed to request human support. Please try again."
+          )
         })
     }
 
@@ -826,7 +841,8 @@
         config.theme = { ...config.theme, ...data.widgetConfig.theme }
         config.greeting = data.widgetConfig.greeting || config.greeting
         config.placeholder = data.widgetConfig.placeholder || config.placeholder
-        config.showBranding = data.widgetConfig.showBranding ?? config.showBranding
+        config.showBranding =
+          data.widgetConfig.showBranding ?? config.showBranding
       }
 
       updateStyles()
@@ -944,7 +960,10 @@
               localStorage.setItem(CONVO_KEY, activeConvoId)
               connectEventStream(activeConvoId)
             } else if (eventData.type === "status") {
-              if (eventData.status === "waiting_agent" || eventData.status === "agent_active") {
+              if (
+                eventData.status === "waiting_agent" ||
+                eventData.status === "agent_active"
+              ) {
                 isHandoffActive = true
                 input.placeholder = "Message support agent..."
               }
@@ -961,7 +980,8 @@
               scrollToBottom()
             } else if (eventData.type === "error" && bubble) {
               bubble.textContent =
-                eventData.message || "Something went wrong generating a response."
+                eventData.message ||
+                "Something went wrong generating a response."
             }
           } catch {
             // Ignore parse errors on partial chunks
@@ -971,7 +991,8 @@
     } catch (err) {
       console.error("[Botly] Chat send error:", err)
       if (bubble) {
-        bubble.textContent = "Could not deliver message. Please check your connection."
+        bubble.textContent =
+          "Could not deliver message. Please check your connection."
       }
     } finally {
       sendBtn.disabled = false

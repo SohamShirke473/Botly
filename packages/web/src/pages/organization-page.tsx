@@ -38,7 +38,7 @@ export function OrganizationPage() {
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       {/* Signed-Out State */}
       <Show when="signed-out">
-        <Card className="mx-auto max-w-md text-center border-border/80">
+        <Card className="border-border/80 mx-auto max-w-md text-center">
           <CardHeader className="items-center">
             <div className="mb-2 flex size-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
               <Lock className="size-6" />
@@ -87,7 +87,7 @@ export function OrganizationPage() {
               )}
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold tracking-tight text-foreground">
+                  <h1 className="text-foreground text-xl font-bold tracking-tight">
                     {organization ? organization.name : "Personal Workspace"}
                   </h1>
                   <Badge
@@ -115,7 +115,7 @@ export function OrganizationPage() {
                   <Building2 className="text-primary size-3.5" />
                   <span>Current Organization</span>
                 </CardDescription>
-                <CardTitle className="text-base truncate">
+                <CardTitle className="truncate text-base">
                   {organization ? organization.name : "Personal Workspace"}
                 </CardTitle>
               </CardHeader>
@@ -156,17 +156,17 @@ export function OrganizationPage() {
 
           {/* Organization Management Tabs */}
           <Tabs defaultValue="manage" className="space-y-4">
-            <TabsList className="p-0.5 bg-muted/60 border border-border/70 rounded-lg inline-flex h-9">
+            <TabsList className="bg-muted/60 border-border/70 inline-flex h-9 rounded-lg border p-0.5">
               <TabsTrigger
                 value="manage"
-                className="gap-1.5 text-xs font-medium px-3.5 h-7.5 rounded-md data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                className="data-[state=active]:bg-card data-[state=active]:text-foreground h-7.5 gap-1.5 rounded-md px-3.5 text-xs font-medium data-[state=active]:shadow-xs"
               >
                 <Settings className="size-3.5" />
                 <span>Manage Organization</span>
               </TabsTrigger>
               <TabsTrigger
                 value="create"
-                className="gap-1.5 text-xs font-medium px-3.5 h-7.5 rounded-md data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                className="data-[state=active]:bg-card data-[state=active]:text-foreground h-7.5 gap-1.5 rounded-md px-3.5 text-xs font-medium data-[state=active]:shadow-xs"
               >
                 <PlusCircle className="size-3.5" />
                 <span>Create New Org</span>
@@ -176,38 +176,47 @@ export function OrganizationPage() {
             {/* Tab 1: Manage Organization via Clerk */}
             <TabsContent value="manage" className="mt-0">
               {organization ? (
-                <div className="flex justify-center w-full">
+                <div className="flex w-full justify-center">
                   <OrganizationProfile
                     routing="hash"
                     appearance={{
                       elements: {
                         rootBox: "w-full max-w-4xl mx-auto",
-                        cardBox: "w-full shadow-xs rounded-xl border border-border/80 overflow-hidden bg-card",
+                        cardBox:
+                          "w-full shadow-xs rounded-xl border border-border/80 overflow-hidden bg-card",
                         card: "bg-card shadow-none border-0 rounded-xl",
-                        navbar: "bg-muted/40 border-r border-border/70 p-4 sm:min-w-52",
+                        navbar:
+                          "bg-muted/40 border-r border-border/70 p-4 sm:min-w-52",
                         navbarButton:
                           "text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-lg transition-colors py-2 px-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold",
                         pageScrollBox: "bg-card p-6 sm:p-8",
-                        headerTitle: "font-sans font-semibold text-foreground text-base tracking-tight",
+                        headerTitle:
+                          "font-sans font-semibold text-foreground text-base tracking-tight",
                         headerSubtitle: "text-muted-foreground text-xs",
                         profileSection: "border-b border-border/60 py-4",
-                        profileSectionTitle: "text-xs font-semibold text-foreground font-sans uppercase tracking-wider",
-                        profileSectionTitleText: "text-xs font-semibold text-foreground font-sans uppercase tracking-wider",
+                        profileSectionTitle:
+                          "text-xs font-semibold text-foreground font-sans uppercase tracking-wider",
+                        profileSectionTitleText:
+                          "text-xs font-semibold text-foreground font-sans uppercase tracking-wider",
                         profileSectionContent: "text-xs text-muted-foreground",
                         profileSectionPrimaryButton:
                           "bg-background hover:bg-muted text-foreground border border-border text-xs font-medium px-3 py-1.5 rounded-lg transition-colors shadow-2xs",
                         formButtonPrimary:
                           "bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors",
-                        formButtonReset: "text-muted-foreground hover:text-foreground text-xs",
+                        formButtonReset:
+                          "text-muted-foreground hover:text-foreground text-xs",
                         formFieldInput:
                           "bg-background border border-border text-foreground text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary",
                         formFieldLabel: "text-xs text-foreground font-medium",
-                        badge: "text-xs font-mono bg-secondary text-secondary-foreground border border-border rounded-md px-2 py-0.5",
+                        badge:
+                          "text-xs font-mono bg-secondary text-secondary-foreground border border-border rounded-md px-2 py-0.5",
                         membersPageInviteButton:
                           "bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-3.5 py-1.5 rounded-lg shadow-xs transition-colors",
                         table: "text-xs",
-                        tableHead: "text-muted-foreground font-medium border-b border-border/60",
-                        tableRow: "border-b border-border/40 hover:bg-muted/30 transition-colors",
+                        tableHead:
+                          "text-muted-foreground font-medium border-b border-border/60",
+                        tableRow:
+                          "border-b border-border/40 hover:bg-muted/30 transition-colors",
                         tableCell: "text-foreground text-xs py-3",
                         footer: "hidden",
                       },
@@ -215,8 +224,8 @@ export function OrganizationPage() {
                   />
                 </div>
               ) : (
-                <Card className="p-8 text-center border-border/80 bg-card">
-                  <CardTitle className="mb-2 text-base font-sans font-semibold">
+                <Card className="border-border/80 bg-card p-8 text-center">
+                  <CardTitle className="mb-2 font-sans text-base font-semibold">
                     No Active Organization
                   </CardTitle>
                   <CardDescription className="mb-4 text-xs">
@@ -229,19 +238,22 @@ export function OrganizationPage() {
 
             {/* Tab 2: Create Organization via Clerk */}
             <TabsContent value="create" className="mt-0">
-              <div className="flex justify-center w-full">
+              <div className="flex w-full justify-center">
                 <CreateOrganization
                   routing="hash"
                   appearance={{
                     elements: {
                       rootBox: "w-full max-w-lg mx-auto",
-                      cardBox: "w-full shadow-xs rounded-xl border border-border/80 overflow-hidden bg-card",
+                      cardBox:
+                        "w-full shadow-xs rounded-xl border border-border/80 overflow-hidden bg-card",
                       card: "bg-card shadow-none border-0 rounded-xl p-6",
-                      headerTitle: "font-sans font-semibold text-foreground text-base tracking-tight",
+                      headerTitle:
+                        "font-sans font-semibold text-foreground text-base tracking-tight",
                       headerSubtitle: "text-muted-foreground text-xs",
                       formButtonPrimary:
                         "bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors",
-                      formButtonReset: "text-muted-foreground hover:text-foreground text-xs",
+                      formButtonReset:
+                        "text-muted-foreground hover:text-foreground text-xs",
                       formFieldInput:
                         "bg-background border border-border text-foreground text-xs rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary",
                       formFieldLabel: "text-xs text-foreground font-medium",

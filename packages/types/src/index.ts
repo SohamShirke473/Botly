@@ -197,12 +197,7 @@ export const TicketStatusSchema = z.enum([
 ])
 export type TicketStatus = z.infer<typeof TicketStatusSchema>
 
-export const TicketPrioritySchema = z.enum([
-  "low",
-  "medium",
-  "high",
-  "urgent",
-])
+export const TicketPrioritySchema = z.enum(["low", "medium", "high", "urgent"])
 export type TicketPriority = z.infer<typeof TicketPrioritySchema>
 
 export const EscalationReasonSchema = z.enum([
@@ -301,4 +296,3 @@ export const BotStatsResponseSchema = z.object({
   messagesPerDay: z.array(DailyMessageStatSchema),
 })
 export type BotStatsResponse = z.infer<typeof BotStatsResponseSchema>
-

@@ -39,18 +39,18 @@ const cardVariants = {
 
 function BotCardSkeleton() {
   return (
-    <div className="h-[128px] rounded-2xl border border-border/70 bg-card/60 p-4 flex flex-col justify-between">
+    <div className="border-border/70 bg-card/60 flex h-[128px] flex-col justify-between rounded-2xl border p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <Skeleton className="size-10.5 rounded-xl shrink-0" />
-          <div className="space-y-1.5 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Skeleton className="size-10.5 shrink-0 rounded-xl" />
+          <div className="flex-1 space-y-1.5">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-3 w-40" />
           </div>
         </div>
-        <Skeleton className="h-5 w-16 rounded-full shrink-0" />
+        <Skeleton className="h-5 w-16 shrink-0 rounded-full" />
       </div>
-      <div className="border-t border-border/50 pt-3 flex items-center justify-between">
+      <div className="border-border/50 flex items-center justify-between border-t pt-3">
         <Skeleton className="h-3 w-28" />
         <Skeleton className="h-3 w-12" />
       </div>
@@ -78,7 +78,7 @@ export function BotListPage() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <Show when="signed-out">
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-24 text-center">
-          <div className="bg-primary/5 text-primary mb-4 flex size-12 items-center justify-center rounded-xl ring-1 ring-primary/10">
+          <div className="bg-primary/5 text-primary ring-primary/10 mb-4 flex size-12 items-center justify-center rounded-xl ring-1">
             <Bot className="size-6" />
           </div>
           <h2 className="text-lg font-semibold tracking-tight">
@@ -103,7 +103,7 @@ export function BotListPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">
+                <h1 className="text-foreground text-xl font-bold tracking-tight">
                   Bots
                 </h1>
                 {botsQuery.data && (
@@ -126,28 +126,29 @@ export function BotListPage() {
 
           {/* Search & Filter Controls */}
           {botsQuery.data && botsQuery.data.length > 0 && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="text-muted-foreground/70 absolute left-3 top-1/2 -translate-y-1/2 size-4" />
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="relative max-w-md flex-1">
+                <Search className="text-muted-foreground/70 absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                 <Input
                   placeholder="Search bots by name..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 pr-8 h-9 text-xs bg-card border-border/80 rounded-xl shadow-2xs focus-visible:ring-primary/20"
+                  className="bg-card border-border/80 focus-visible:ring-primary/20 h-9 rounded-xl pr-8 pl-9 text-xs shadow-2xs"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="text-muted-foreground hover:text-foreground absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted/60 transition-colors cursor-pointer"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/60 absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer rounded p-0.5 transition-colors"
                     title="Clear search"
                   >
                     <X className="size-3.5" />
                   </button>
                 )}
               </div>
-              <div className="text-xs text-muted-foreground font-medium">
-                Showing {filteredBots.length} of {botsQuery.data.length} {botsQuery.data.length === 1 ? "bot" : "bots"}
+              <div className="text-muted-foreground text-xs font-medium">
+                Showing {filteredBots.length} of {botsQuery.data.length}{" "}
+                {botsQuery.data.length === 1 ? "bot" : "bots"}
               </div>
             </div>
           )}
@@ -163,11 +164,11 @@ export function BotListPage() {
 
           {/* Empty State: No bots created yet */}
           {botsQuery.data && botsQuery.data.length === 0 && (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-card/50 p-12 text-center">
-              <div className="bg-primary/5 text-primary mb-3 flex size-12 items-center justify-center rounded-xl ring-1 ring-primary/10">
+            <div className="bg-card/50 flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
+              <div className="bg-primary/5 text-primary ring-primary/10 mb-3 flex size-12 items-center justify-center rounded-xl ring-1">
                 <Layers className="size-6" />
               </div>
-              <h3 className="text-sm font-semibold text-foreground">
+              <h3 className="text-foreground text-sm font-semibold">
                 No bots created yet
               </h3>
               <p className="text-muted-foreground mt-1 max-w-sm text-xs leading-relaxed">
@@ -225,45 +226,48 @@ export function BotListPage() {
                     to={`/dashboard/bots/${bot.id}`}
                     className="group block h-full"
                   >
-                    <div className="h-full rounded-2xl border border-border/80 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:shadow-md flex flex-col justify-between gap-4">
+                    <div className="border-border/80 bg-card hover:border-primary/40 flex h-full flex-col justify-between gap-4 rounded-2xl border p-4 transition-all duration-200 hover:shadow-md">
                       {/* Top: Icon, Bot Name, Prompt snippet, Status */}
                       <div>
                         <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="bg-primary/10 text-primary flex size-10.5 shrink-0 items-center justify-center rounded-xl ring-1 ring-primary/15 transition-all duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-105 shadow-2xs">
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
+                            <div className="bg-primary/10 text-primary ring-primary/15 group-hover:bg-primary group-hover:text-primary-foreground flex size-10.5 shrink-0 items-center justify-center rounded-xl shadow-2xs ring-1 transition-all duration-200 group-hover:scale-105">
                               <Bot className="size-5" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h3 className="text-sm font-semibold tracking-tight text-foreground truncate group-hover:text-primary transition-colors">
+                              <h3 className="text-foreground group-hover:text-primary truncate text-sm font-semibold tracking-tight transition-colors">
                                 {bot.name}
                               </h3>
-                              <p className="text-muted-foreground text-xs line-clamp-1 mt-0.5 leading-relaxed">
-                                {bot.system_prompt || "Customer support AI assistant"}
+                              <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs leading-relaxed">
+                                {bot.system_prompt ||
+                                  "Customer support AI assistant"}
                               </p>
                             </div>
                           </div>
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-status-ready/15 px-2.5 py-0.5 text-[11px] font-medium text-status-ready border border-status-ready/20 shrink-0">
-                            <span className="size-1.5 rounded-full bg-status-ready animate-pulse" />
+                          <span className="bg-status-ready/15 text-status-ready border-status-ready/20 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium">
+                            <span className="bg-status-ready size-1.5 animate-pulse rounded-full" />
                             Active
                           </span>
                         </div>
                       </div>
 
                       {/* Bottom: Prompt indicator, Created date, Manage link */}
-                      <div className="border-t border-border/60 pt-3 flex items-center justify-between text-muted-foreground text-xs">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="inline-flex items-center gap-1.5 text-[11px] truncate">
-                            <FileText className="size-3 text-muted-foreground/70 shrink-0" />
+                      <div className="border-border/60 text-muted-foreground flex items-center justify-between border-t pt-3 text-xs">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 truncate text-[11px]">
+                            <FileText className="text-muted-foreground/70 size-3 shrink-0" />
                             <span className="truncate">
-                              {bot.system_prompt ? "Custom prompt" : "Default prompt"}
+                              {bot.system_prompt
+                                ? "Custom prompt"
+                                : "Default prompt"}
                             </span>
                           </span>
                           <span className="text-border shrink-0">•</span>
-                          <span className="font-mono text-[11px] shrink-0">
+                          <span className="shrink-0 font-mono text-[11px]">
                             {new Date(bot.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="inline-flex items-center gap-1 text-[11px] font-medium text-primary shrink-0 opacity-85 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150">
+                        <div className="text-primary inline-flex shrink-0 items-center gap-1 text-[11px] font-medium opacity-85 transition-all duration-150 group-hover:translate-x-0.5 group-hover:opacity-100">
                           <span>Manage</span>
                           <ArrowRight className="size-3" />
                         </div>
@@ -277,7 +281,7 @@ export function BotListPage() {
 
           {/* Error State */}
           {botsQuery.isError && (
-            <div className="rounded-xl border border-destructive/20 bg-destructive/5 py-10 text-center">
+            <div className="border-destructive/20 bg-destructive/5 rounded-xl border py-10 text-center">
               <p className="text-destructive text-sm font-medium">
                 Failed to load bots.
               </p>

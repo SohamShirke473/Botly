@@ -18,7 +18,7 @@ export function ThemeToggle() {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="size-8 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground size-8"
             aria-label="Toggle theme"
           />
         }
@@ -35,30 +35,30 @@ export function ThemeToggle() {
           className="flex items-center justify-between text-xs"
         >
           <span className="flex items-center gap-2">
-            <Sun className="size-3.5 text-muted-foreground" />
+            <Sun className="text-muted-foreground size-3.5" />
             Light
           </span>
-          {theme === "light" && <Check className="size-3 text-primary" />}
+          {theme === "light" && <Check className="text-primary size-3" />}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
           className="flex items-center justify-between text-xs"
         >
           <span className="flex items-center gap-2">
-            <Moon className="size-3.5 text-muted-foreground" />
+            <Moon className="text-muted-foreground size-3.5" />
             Dark
           </span>
-          {theme === "dark" && <Check className="size-3 text-primary" />}
+          {theme === "dark" && <Check className="text-primary size-3" />}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("system")}
           className="flex items-center justify-between text-xs"
         >
           <span className="flex items-center gap-2">
-            <Laptop className="size-3.5 text-muted-foreground" />
+            <Laptop className="text-muted-foreground size-3.5" />
             System
           </span>
-          {theme === "system" && <Check className="size-3 text-primary" />}
+          {theme === "system" && <Check className="text-primary size-3" />}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

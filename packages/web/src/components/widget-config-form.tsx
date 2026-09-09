@@ -55,7 +55,7 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Color Picker */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">
+            <Label className="text-foreground text-xs font-medium">
               Primary Brand Color
             </Label>
             <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
                   render={
                     <button
                       type="button"
-                      className="border-input ring-foreground/10 focus-visible:border-ring focus-visible:ring-ring/50 size-8 shrink-0 rounded-lg border ring-1 transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:outline-none cursor-pointer"
+                      className="border-input ring-foreground/10 focus-visible:border-ring focus-visible:ring-ring/50 size-8 shrink-0 cursor-pointer rounded-lg border ring-1 transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:outline-none"
                       style={{ backgroundColor: value.theme.primaryColor }}
                       aria-label="Pick primary color"
                     />
@@ -72,26 +72,30 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
                 />
                 <PopoverContent className="w-64 p-3" align="start">
                   <div className="space-y-3">
-                    <Label className="text-xs font-medium">Palette Presets</Label>
+                    <Label className="text-xs font-medium">
+                      Palette Presets
+                    </Label>
                     <div className="grid grid-cols-4 gap-2">
                       {PRESET_COLORS.map((color) => (
                         <button
                           key={color.hex}
                           type="button"
-                          className={`size-7 rounded-md border-2 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:outline-none cursor-pointer ${
+                          className={`size-7 cursor-pointer rounded-md border-2 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:outline-none ${
                             value.theme.primaryColor.toLowerCase() ===
                             color.hex.toLowerCase()
                               ? "border-foreground ring-foreground/20 ring-2"
                               : "border-transparent"
                           }`}
                           style={{ backgroundColor: color.hex }}
-                          onClick={() => updateTheme({ primaryColor: color.hex })}
+                          onClick={() =>
+                            updateTheme({ primaryColor: color.hex })
+                          }
                           title={color.label}
                           aria-label={`Select ${color.label}`}
                         />
                       ))}
                     </div>
-                    <div className="flex items-center gap-2 pt-1 border-t border-border/60">
+                    <div className="border-border/60 flex items-center gap-2 border-t pt-1">
                       <Input
                         type="color"
                         value={value.theme.primaryColor}
@@ -120,7 +124,7 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
 
           {/* Position */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">
+            <Label className="text-foreground text-xs font-medium">
               Screen Position
             </Label>
             <RadioGroup
@@ -132,11 +136,11 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
               }
               className="flex gap-2"
             >
-              <label className="border-border hover:bg-muted has-[[data-checked]]:border-foreground has-[[data-checked]]:bg-accent/40 flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors flex-1 justify-center">
+              <label className="border-border hover:bg-muted has-[[data-checked]]:border-foreground has-[[data-checked]]:bg-accent/40 flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors">
                 <RadioGroupItem value="bottom-right" />
                 Bottom Right
               </label>
-              <label className="border-border hover:bg-muted has-[[data-checked]]:border-foreground has-[[data-checked]]:bg-accent/40 flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors flex-1 justify-center">
+              <label className="border-border hover:bg-muted has-[[data-checked]]:border-foreground has-[[data-checked]]:bg-accent/40 flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors">
                 <RadioGroupItem value="bottom-left" />
                 Bottom Left
               </label>
@@ -145,8 +149,8 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
         </div>
 
         {/* Bubble Icon */}
-        <div className="space-y-1.5 max-w-xs">
-          <Label className="text-xs font-medium text-foreground">
+        <div className="max-w-xs space-y-1.5">
+          <Label className="text-foreground text-xs font-medium">
             Launcher Bubble Icon
           </Label>
           <Select
@@ -185,20 +189,23 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
       </div>
 
       {/* Messages Section */}
-      <div className="space-y-3 pt-2 border-t border-border/60">
+      <div className="border-border/60 space-y-3 border-t pt-2">
         <h4 className="text-muted-foreground/80 text-[11px] font-semibold tracking-wider uppercase">
           Welcome & Copy
         </h4>
 
         <div className="space-y-1.5">
-          <Label htmlFor="greeting" className="text-xs font-medium text-foreground">
+          <Label
+            htmlFor="greeting"
+            className="text-foreground text-xs font-medium"
+          >
             Greeting Message
           </Label>
           <Input
             id="greeting"
             value={value.greeting}
             onChange={(e) => onChange({ ...value, greeting: e.target.value })}
-            className="h-8 text-xs bg-background"
+            className="bg-background h-8 text-xs"
             maxLength={200}
           />
           <p className="text-muted-foreground text-[11px]">
@@ -207,7 +214,10 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="placeholder" className="text-xs font-medium text-foreground">
+          <Label
+            htmlFor="placeholder"
+            className="text-foreground text-xs font-medium"
+          >
             Input Placeholder
           </Label>
           <Input
@@ -216,16 +226,16 @@ export function WidgetConfigForm({ value, onChange }: WidgetConfigFormProps) {
             onChange={(e) =>
               onChange({ ...value, placeholder: e.target.value })
             }
-            className="h-8 text-xs bg-background"
+            className="bg-background h-8 text-xs"
             maxLength={100}
           />
         </div>
       </div>
 
       {/* Branding Toggle */}
-      <div className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/20 p-3">
+      <div className="border-border/80 bg-muted/20 flex items-center justify-between rounded-lg border p-3">
         <div className="space-y-0.5">
-          <Label className="text-xs font-medium text-foreground">
+          <Label className="text-foreground text-xs font-medium">
             Show Botly Branding
           </Label>
           <p className="text-muted-foreground text-[11px]">

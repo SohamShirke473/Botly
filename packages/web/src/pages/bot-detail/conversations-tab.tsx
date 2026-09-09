@@ -49,7 +49,10 @@ const MARKDOWN_STYLES = `
   .md-link { text-decoration:underline; font-weight:500; }
 `
 
-if (typeof document !== "undefined" && !document.getElementById("botly-md-styles")) {
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById("botly-md-styles")
+) {
   const styleEl = document.createElement("style")
   styleEl.id = "botly-md-styles"
   styleEl.textContent = MARKDOWN_STYLES
@@ -69,28 +72,28 @@ function renderStatusBadge(status?: string) {
   switch (status) {
     case "waiting_agent":
       return (
-        <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-semibold tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-          <span className="size-1 rounded-full bg-amber-500 animate-ping" />
+        <span className="py-0.2 inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/15 px-1.5 text-[9px] font-semibold tracking-wider text-amber-600 dark:text-amber-400">
+          <span className="size-1 animate-ping rounded-full bg-amber-500" />
           Awaiting Agent
         </span>
       )
     case "agent_active":
       return (
-        <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-semibold tracking-wider bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
+        <span className="py-0.2 inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/15 px-1.5 text-[9px] font-semibold tracking-wider text-blue-600 dark:text-blue-400">
           <span className="size-1 rounded-full bg-blue-500" />
           Agent Active
         </span>
       )
     case "resolved":
       return (
-        <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-medium tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+        <span className="py-0.2 inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-1.5 text-[9px] font-medium tracking-wider text-emerald-600 dark:text-emerald-400">
           Resolved
         </span>
       )
     case "bot":
     default:
       return (
-        <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-medium tracking-wider bg-muted text-muted-foreground border border-border/60">
+        <span className="py-0.2 bg-muted text-muted-foreground border-border/60 inline-flex items-center gap-1 rounded-full border px-1.5 text-[9px] font-medium tracking-wider">
           AI Bot
         </span>
       )
@@ -106,12 +109,16 @@ function MarkdownContent({
   isUser: boolean
 }) {
   if (isUser) {
-    return <p className="min-w-0 wrap-break-word whitespace-pre-wrap leading-relaxed">{content}</p>
+    return (
+      <p className="min-w-0 leading-relaxed wrap-break-word whitespace-pre-wrap">
+        {content}
+      </p>
+    )
   }
 
   return (
     <div
-      className="min-w-0 wrap-anywhere leading-relaxed text-xs"
+      className="min-w-0 text-xs leading-relaxed wrap-anywhere"
       dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
     />
   )
@@ -181,27 +188,31 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
         status === "agent_active"
           ? "You took over this conversation"
           : status === "bot"
-          ? "Conversation handed back to AI"
-          : "Conversation marked as resolved"
+            ? "Conversation handed back to AI"
+            : "Conversation marked as resolved"
       )
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update status")
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update status"
+      )
     }
   }
 
   return (
-    <div className="flex h-[660px] max-h-[calc(100vh-200px)] rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
+    <div className="border-border/80 bg-card flex h-165 max-h-[calc(100vh-200px)] overflow-hidden rounded-xl border shadow-xs">
       {/* Conversation Sessions List */}
-      <div className="w-80 shrink-0 border-r border-border/80 flex flex-col bg-muted/10">
-        <div className="border-b border-border/80 px-3.5 py-3 flex items-center justify-between">
+      <div className="border-border/80 bg-muted/10 flex w-80 shrink-0 flex-col border-r">
+        <div className="border-border/80 flex items-center justify-between border-b px-3.5 py-3">
           <div className="flex items-center gap-2">
-            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            <h4 className="text-foreground text-xs font-semibold tracking-wider uppercase">
               Sessions
             </h4>
-            <div className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-1 font-mono text-[10px]">
               <span
                 className={`size-1.5 rounded-full ${
-                  isWsConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                  isWsConnected
+                    ? "animate-pulse bg-emerald-500"
+                    : "bg-amber-500"
                 }`}
               />
               <span>{isWsConnected ? "Live" : "WS"}</span>
@@ -220,24 +231,24 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
               ))}
             </div>
           ) : convosQuery.data && convosQuery.data.length > 0 ? (
-            <div className="p-1.5 space-y-1">
+            <div className="space-y-1 p-1.5">
               {convosQuery.data.map((convo) => {
                 const isSelected = activeId === convo.id
                 return (
                   <button
                     key={convo.id}
                     onClick={() => setSelectedId(convo.id)}
-                    className={`w-full rounded-lg px-3 py-2.5 text-left transition-all cursor-pointer ${
+                    className={`w-full cursor-pointer rounded-lg px-3 py-2.5 text-left transition-all ${
                       isSelected
-                        ? "bg-accent text-accent-foreground font-medium shadow-2xs border-l-2 border-foreground"
+                        ? "bg-accent text-accent-foreground border-foreground border-l-2 font-medium shadow-2xs"
                         : "hover:bg-muted/50 text-muted-foreground border-l-2 border-transparent"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs font-semibold text-foreground truncate">
+                      <span className="text-foreground truncate text-xs font-semibold">
                         {formatVisitorDisplay(convo)}
                       </span>
-                      <span className="font-mono text-[10px] text-muted-foreground/70 shrink-0">
+                      <span className="text-muted-foreground/70 shrink-0 font-mono text-[10px]">
                         {new Date(convo.created_at).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -246,12 +257,12 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                     </div>
 
                     <div className="mt-1 flex items-center justify-between gap-1">
-                      <p className="truncate text-[11px] text-muted-foreground/80 leading-normal flex-1">
+                      <p className="text-muted-foreground/80 flex-1 truncate text-[11px] leading-normal">
                         {convo.last_message || "No messages"}
                       </p>
                     </div>
 
-                    <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground/60 font-mono">
+                    <div className="text-muted-foreground/60 mt-1.5 flex items-center justify-between font-mono text-[10px]">
                       {renderStatusBadge(convo.status)}
                       <span>{convo.message_count ?? 0} turns</span>
                     </div>
@@ -263,10 +274,10 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
             <div className="flex h-full items-center justify-center p-6 text-center">
               <div>
                 <MessageSquareText className="text-muted-foreground/40 mx-auto mb-1.5 size-5" />
-                <p className="text-xs font-medium text-foreground">
+                <p className="text-foreground text-xs font-medium">
                   No conversations yet
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 max-w-[180px]">
+                <p className="text-muted-foreground mt-0.5 max-w-45 text-[11px]">
                   Visitor chats will appear here once the widget is active.
                 </p>
               </div>
@@ -276,30 +287,32 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
       </div>
 
       {/* Message Transcript & Live Agent Console */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
+      <div className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
         {activeId ? (
           <>
             {/* Header with status toggle & actions */}
-            <div className="border-b border-border/80 px-4 py-3 flex items-center justify-between bg-card/60 gap-3">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-xs font-semibold text-foreground truncate">
-                  {activeConvo ? formatVisitorDisplay(activeConvo) : "Transcript"}
+            <div className="border-border/80 bg-card/60 flex items-center justify-between gap-3 border-b px-4 py-3">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="text-foreground truncate text-xs font-semibold">
+                  {activeConvo
+                    ? formatVisitorDisplay(activeConvo)
+                    : "Transcript"}
                 </span>
                 <span className="text-border">•</span>
-                <span className="font-mono text-[11px] text-muted-foreground truncate hidden sm:inline">
+                <span className="text-muted-foreground hidden truncate font-mono text-[11px] sm:inline">
                   {activeConvo?.visitor_id}
                 </span>
                 {renderStatusBadge(activeConvo?.status)}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex shrink-0 items-center gap-2">
                 {isAgentActive ? (
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleStatusToggle("bot")}
                     disabled={updateStatusMutation.isPending}
-                    className="h-7 text-xs gap-1 cursor-pointer"
+                    className="h-7 cursor-pointer gap-1 text-xs"
                   >
                     <RotateCcw className="size-3" />
                     Return to AI
@@ -309,7 +322,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                     size="sm"
                     onClick={() => handleStatusToggle("agent_active")}
                     disabled={updateStatusMutation.isPending}
-                    className="h-7 text-xs gap-1 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer shadow-2xs font-medium"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 cursor-pointer gap-1 text-xs font-medium shadow-2xs"
                   >
                     <Headphones className="size-3" />
                     Take Over
@@ -322,14 +335,14 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                     variant="ghost"
                     onClick={() => handleStatusToggle("resolved")}
                     disabled={updateStatusMutation.isPending}
-                    className="h-7 text-xs gap-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
+                    className="h-7 cursor-pointer gap-1 text-xs text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
                   >
                     <CheckCircle2 className="size-3" />
                     Resolve
                   </Button>
                 )}
 
-                <Badge variant="secondary" className="text-[10px] font-mono">
+                <Badge variant="secondary" className="font-mono text-[10px]">
                   {messagesQuery.data?.length ?? 0} msgs
                 </Badge>
               </div>
@@ -337,9 +350,9 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
 
             {/* AI Paused Notice Banner */}
             {(isAgentActive || isWaitingAgent) && (
-              <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs text-amber-700 dark:text-amber-300">
+              <div className="flex items-center justify-between border-b border-amber-500/20 bg-amber-500/10 px-4 py-2 text-xs text-amber-700 dark:text-amber-300">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="size-1.5 animate-pulse rounded-full bg-amber-500" />
                   {isWaitingAgent
                     ? "Visitor requested human support. AI is standing by."
                     : "Human takeover active. AI bot is paused for this session."}
@@ -348,7 +361,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                   <Button
                     size="sm"
                     onClick={() => handleStatusToggle("agent_active")}
-                    className="h-6 text-[11px] px-2.5 bg-amber-600 text-white hover:bg-amber-700"
+                    className="h-6 bg-amber-600 px-2.5 text-[11px] text-white hover:bg-amber-700"
                   >
                     Accept & Chat
                   </Button>
@@ -358,7 +371,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
 
             {/* Transcript Messages Area */}
             <ScrollArea className="min-h-0 flex-1 p-4">
-              <div className="space-y-4 max-w-3xl mx-auto py-2">
+              <div className="mx-auto max-w-3xl space-y-4 py-2">
                 {messagesQuery.isLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
@@ -368,7 +381,8 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                 ) : messagesQuery.data && messagesQuery.data.length > 0 ? (
                   messagesQuery.data.map((msg) => {
                     const isUser = msg.role === "user"
-                    const isAgent = msg.role === "agent" || msg.is_human === true
+                    const isAgent =
+                      msg.role === "agent" || msg.is_human === true
 
                     return (
                       <div
@@ -379,7 +393,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                       >
                         {!isUser && (
                           <div
-                            className={`size-7 shrink-0 items-center justify-center rounded-lg mt-0.5 flex shadow-2xs ${
+                            className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg shadow-2xs ${
                               isAgent
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-primary/10 text-primary"
@@ -395,18 +409,18 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                         <div className="group relative max-w-[76%] space-y-1">
                           {/* Label */}
                           <div
-                            className={`text-[10px] font-medium flex items-center gap-1.5 ${
+                            className={`flex items-center gap-1.5 text-[10px] font-medium ${
                               isUser
-                                ? "justify-end text-muted-foreground"
-                                : "justify-start text-foreground/75"
+                                ? "text-muted-foreground justify-end"
+                                : "text-foreground/75 justify-start"
                             }`}
                           >
                             <span>
                               {isUser
                                 ? "Visitor"
                                 : isAgent
-                                ? `Agent: ${msg.sender_name || "Support"}`
-                                : "AI Bot"}
+                                  ? `Agent: ${msg.sender_name || "Support"}`
+                                  : "AI Bot"}
                             </span>
                           </div>
 
@@ -415,8 +429,8 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                               isUser
                                 ? "bg-primary text-primary-foreground rounded-tr-xs"
                                 : isAgent
-                                ? "bg-primary/10 text-foreground border border-primary/30 rounded-tl-xs"
-                                : "bg-card text-foreground border border-border/80 rounded-tl-xs"
+                                  ? "bg-primary/10 text-foreground border-primary/30 rounded-tl-xs border"
+                                  : "bg-card text-foreground border-border/80 rounded-tl-xs border"
                             }`}
                           >
                             <MarkdownContent
@@ -426,7 +440,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                           </div>
 
                           <div
-                            className={`flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground/60 ${
+                            className={`text-muted-foreground/60 flex items-center gap-1.5 font-mono text-[10px] ${
                               isUser ? "justify-end" : "justify-start"
                             }`}
                           >
@@ -439,11 +453,11 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                             <button
                               type="button"
                               onClick={() => copyMessage(msg.id, msg.content)}
-                              className="opacity-0 group-hover:opacity-100 hover:text-foreground transition-opacity cursor-pointer ml-1"
+                              className="hover:text-foreground ml-1 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100"
                               title="Copy message"
                             >
                               {copiedMsgId === msg.id ? (
-                                <Check className="size-2.5 text-status-ready" />
+                                <Check className="text-status-ready size-2.5" />
                               ) : (
                                 <Copy className="size-2.5" />
                               )}
@@ -452,7 +466,7 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                         </div>
 
                         {isUser && (
-                          <div className="bg-muted text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-lg mt-0.5">
+                          <div className="bg-muted text-muted-foreground mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg">
                             <User className="size-3.5" />
                           </div>
                         )}
@@ -471,8 +485,11 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
             </ScrollArea>
 
             {/* Live Agent Input Composer */}
-            <div className="border-t border-border/80 bg-card/80 p-3 space-y-2">
-              <form onSubmit={handleSendReply} className="flex gap-2 items-center">
+            <div className="border-border/80 bg-card/80 space-y-2 border-t p-3">
+              <form
+                onSubmit={handleSendReply}
+                className="flex items-center gap-2"
+              >
                 <input
                   type="text"
                   value={agentReply}
@@ -482,13 +499,13 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
                       ? "Send message as human support agent..."
                       : "Type a response (sending will automatically activate agent takeover)..."
                   }
-                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="border-border bg-background focus:ring-primary flex-1 rounded-lg border px-3 py-2 text-xs focus:ring-1 focus:outline-none"
                 />
                 <Button
                   type="submit"
                   size="sm"
                   disabled={!agentReply.trim() || sendMessageMutation.isPending}
-                  className="h-8 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-2xs font-medium"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 cursor-pointer gap-1.5 text-xs font-medium shadow-2xs"
                 >
                   <Send className="size-3" />
                   Send
@@ -500,11 +517,12 @@ export function ConversationsTab({ bot }: { bot: Bot }) {
           <div className="flex flex-1 items-center justify-center p-6 text-center">
             <div>
               <MessageSquareText className="text-muted-foreground/40 mx-auto mb-2 size-6" />
-              <p className="text-xs font-medium text-foreground">
+              <p className="text-foreground text-xs font-medium">
                 No session selected
               </p>
-              <p className="text-muted-foreground text-[11px] mt-0.5">
-                Choose a conversation on the left to review the full message transcript.
+              <p className="text-muted-foreground mt-0.5 text-[11px]">
+                Choose a conversation on the left to review the full message
+                transcript.
               </p>
             </div>
           </div>

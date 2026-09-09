@@ -155,7 +155,9 @@ export const tickets = pgTable(
       .unique(),
     status: ticketStatusEnum("status").notNull().default("open"),
     priority: ticketPriorityEnum("priority").notNull().default("medium"),
-    escalationReason: escalationReasonEnum("escalation_reason").notNull().default("visitor_requested"),
+    escalationReason: escalationReasonEnum("escalation_reason")
+      .notNull()
+      .default("visitor_requested"),
     visitorName: text("visitor_name"),
     visitorEmail: text("visitor_email"),
     assignedTo: text("assigned_to"),
@@ -172,4 +174,3 @@ export const tickets = pgTable(
     index("tickets_conversation_id_idx").on(table.conversationId),
   ]
 )
-

@@ -14,8 +14,6 @@ import type {
 
 const baseUrl = import.meta.env.VITE_API_URL || ""
 
-
-
 // ─── Helper to get auth headers ─────────────────────────────────────
 
 function useAuthHeaders() {
@@ -45,7 +43,9 @@ export function useBotsQuery(orgId?: string | null) {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to fetch bots (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to fetch bots (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
@@ -64,7 +64,9 @@ export function useBotQuery(botId: string | undefined) {
       const res = await fetch(`${baseUrl}/api/bots/${botId}`, { headers })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to fetch bot ${botId} (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to fetch bot ${botId} (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
@@ -86,7 +88,9 @@ export function useCreateBotMutation() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to create bot (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to create bot (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
@@ -110,7 +114,9 @@ export function useUpdateBotMutation() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to update bot (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to update bot (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
@@ -134,7 +140,9 @@ export function useDeleteBotMutation() {
       })
       if (!res.ok && res.status !== 204) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to delete bot (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to delete bot (HTTP ${res.status})`
+        )
       }
     },
     onSuccess: () => {
@@ -158,7 +166,9 @@ export function useDocumentsQuery(botId: string | undefined) {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to fetch documents for bot ${botId}`)
+        throw new Error(
+          err.message || `Failed to fetch documents for bot ${botId}`
+        )
       }
       return res.json()
     },
@@ -183,7 +193,9 @@ export function useUploadDocumentMutation() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to upload document: ${file.name}`)
+        throw new Error(
+          err.message || `Failed to upload document: ${file.name}`
+        )
       }
       return res.json()
     },
@@ -251,29 +263,28 @@ export function useDeleteDocumentMutation() {
 export function useEmbedSnippetQuery(botId: string | undefined) {
   const getHeaders = useAuthHeaders()
 
-  return useQuery<
-    { botId: string; snippet: string; scriptUrl: string },
-    Error
-  >({
-    queryKey: ["bots", botId, "embed-snippet"],
-    queryFn: async () => {
-      if (!botId) throw new Error("No bot ID provided")
-      const headers = await getHeaders()
-      const res = await fetch(`${baseUrl}/api/bots/${botId}/embed-snippet`, {
-        headers,
-      })
-      if (!res.ok) {
-        const host = window.location.origin
-        return {
-          botId,
-          snippet: `<script\n  src="${host}/widget.js"\n  data-bot-id="${botId}"\n  async\n></script>`,
-          scriptUrl: `${host}/widget.js`,
+  return useQuery<{ botId: string; snippet: string; scriptUrl: string }, Error>(
+    {
+      queryKey: ["bots", botId, "embed-snippet"],
+      queryFn: async () => {
+        if (!botId) throw new Error("No bot ID provided")
+        const headers = await getHeaders()
+        const res = await fetch(`${baseUrl}/api/bots/${botId}/embed-snippet`, {
+          headers,
+        })
+        if (!res.ok) {
+          const host = window.location.origin
+          return {
+            botId,
+            snippet: `<script\n  src="${host}/widget.js"\n  data-bot-id="${botId}"\n  async\n></script>`,
+            scriptUrl: `${host}/widget.js`,
+          }
         }
-      }
-      return res.json()
-    },
-    enabled: !!botId,
-  })
+        return res.json()
+      },
+      enabled: !!botId,
+    }
+  )
 }
 
 export function useReprocessDocumentMutation() {
@@ -319,7 +330,9 @@ export function useConversationsQuery(botId: string | undefined) {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to fetch conversations for bot ${botId}`)
+        throw new Error(
+          err.message || `Failed to fetch conversations for bot ${botId}`
+        )
       }
       return res.json()
     },
@@ -341,7 +354,10 @@ export function useMessagesQuery(conversationId: string | undefined) {
       )
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to fetch messages for conversation ${conversationId}`)
+        throw new Error(
+          err.message ||
+            `Failed to fetch messages for conversation ${conversationId}`
+        )
       }
       return res.json()
     },
@@ -363,15 +379,19 @@ export function useTicketsQuery(filters?: {
     queryFn: async () => {
       const headers = await getHeaders()
       const params = new URLSearchParams()
-      if (filters?.status && filters.status !== "all") params.set("status", filters.status)
-      if (filters?.priority && filters.priority !== "all") params.set("priority", filters.priority)
+      if (filters?.status && filters.status !== "all")
+        params.set("status", filters.status)
+      if (filters?.priority && filters.priority !== "all")
+        params.set("priority", filters.priority)
       if (filters?.botId) params.set("botId", filters.botId)
 
       const url = `${baseUrl}/api/tickets${params.toString() ? `?${params.toString()}` : ""}`
       const res = await fetch(url, { headers })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to fetch tickets (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to fetch tickets (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
@@ -390,7 +410,10 @@ export function useTicketQuery(ticketId: string | undefined) {
       const res = await fetch(`${baseUrl}/api/tickets/${ticketId}`, { headers })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to fetch ticket ${ticketId} (HTTP ${res.status})`)
+        throw new Error(
+          err.message ||
+            `Failed to fetch ticket ${ticketId} (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
@@ -402,7 +425,11 @@ export function useUpdateTicketMutation() {
   const queryClient = useQueryClient()
   const getHeaders = useAuthHeaders()
 
-  return useMutation<Ticket, Error, { ticketId: string; updates: UpdateTicketInput }>({
+  return useMutation<
+    Ticket,
+    Error,
+    { ticketId: string; updates: UpdateTicketInput }
+  >({
     mutationFn: async ({ ticketId, updates }) => {
       const headers = await getHeaders()
       const res = await fetch(`${baseUrl}/api/tickets/${ticketId}`, {
@@ -412,13 +439,17 @@ export function useUpdateTicketMutation() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to update ticket (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to update ticket (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["tickets"] })
-      queryClient.invalidateQueries({ queryKey: ["tickets", variables.ticketId] })
+      queryClient.invalidateQueries({
+        queryKey: ["tickets", variables.ticketId],
+      })
       queryClient.invalidateQueries({ queryKey: ["conversations"] })
     },
   })
@@ -438,12 +469,16 @@ export function useSendAgentTicketMessageMutation() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to send agent message (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to send agent message (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tickets", variables.ticketId] })
+      queryClient.invalidateQueries({
+        queryKey: ["tickets", variables.ticketId],
+      })
       queryClient.invalidateQueries({ queryKey: ["tickets"] })
       queryClient.invalidateQueries({ queryKey: ["conversations"] })
     },
@@ -454,22 +489,33 @@ export function useSendConversationMessageMutation() {
   const queryClient = useQueryClient()
   const getHeaders = useAuthHeaders()
 
-  return useMutation<Message, Error, { conversationId: string; content: string }>({
+  return useMutation<
+    Message,
+    Error,
+    { conversationId: string; content: string }
+  >({
     mutationFn: async ({ conversationId, content }) => {
       const headers = await getHeaders()
-      const res = await fetch(`${baseUrl}/api/conversations/${conversationId}/messages`, {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      })
+      const res = await fetch(
+        `${baseUrl}/api/conversations/${conversationId}/messages`,
+        {
+          method: "POST",
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        }
+      )
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to send message (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to send message (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["messages", variables.conversationId] })
+      queryClient.invalidateQueries({
+        queryKey: ["messages", variables.conversationId],
+      })
       queryClient.invalidateQueries({ queryKey: ["conversations"] })
       queryClient.invalidateQueries({ queryKey: ["tickets"] })
     },
@@ -480,23 +526,34 @@ export function useUpdateConversationStatusMutation() {
   const queryClient = useQueryClient()
   const getHeaders = useAuthHeaders()
 
-  return useMutation<{ success: boolean; status: string }, Error, { conversationId: string; status: string }>({
+  return useMutation<
+    { success: boolean; status: string },
+    Error,
+    { conversationId: string; status: string }
+  >({
     mutationFn: async ({ conversationId, status }) => {
       const headers = await getHeaders()
-      const res = await fetch(`${baseUrl}/api/conversations/${conversationId}/status`, {
-        method: "PATCH",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      })
+      const res = await fetch(
+        `${baseUrl}/api/conversations/${conversationId}/status`,
+        {
+          method: "PATCH",
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        }
+      )
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to update status (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to update status (HTTP ${res.status})`
+        )
       }
       return res.json()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] })
-      queryClient.invalidateQueries({ queryKey: ["messages", variables.conversationId] })
+      queryClient.invalidateQueries({
+        queryKey: ["messages", variables.conversationId],
+      })
       queryClient.invalidateQueries({ queryKey: ["tickets"] })
     },
   })
@@ -541,7 +598,9 @@ export function useUpdateWidgetConfigMutation() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || `Failed to update widget config (HTTP ${res.status})`)
+        throw new Error(
+          err.message || `Failed to update widget config (HTTP ${res.status})`
+        )
       }
       return res.json()
     },

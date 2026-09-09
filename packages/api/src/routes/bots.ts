@@ -155,7 +155,10 @@ botsRouter.delete(
         try {
           await deleteFile(doc.storageKey)
         } catch (err) {
-          logger.warn(err, `Failed to delete S3 file ${doc.storageKey} on bot cleanup`)
+          logger.warn(
+            err,
+            `Failed to delete S3 file ${doc.storageKey} on bot cleanup`
+          )
         }
       }
     }

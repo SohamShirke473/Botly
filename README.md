@@ -36,12 +36,12 @@ bun run docker:up
 bun run docker:down
 ```
 
-| Service | Endpoint | Credentials / Details |
-|---|---|---|
-| **PostgreSQL (`pgvector`)** | `localhost:5432` | User: `postgres`, DB: `botly` |
-| **MinIO API (S3)** | `http://localhost:9000` | Access/Secret: `minioadmin` / `minioadmin` |
-| **MinIO Console** | `http://localhost:9001` | S3 bucket: `botly-documents` |
-| **Inngest Dev Server** | `http://localhost:8288` | `npx inngest-cli@latest dev` |
+| Service                     | Endpoint                | Credentials / Details                      |
+| --------------------------- | ----------------------- | ------------------------------------------ |
+| **PostgreSQL (`pgvector`)** | `localhost:5432`        | User: `postgres`, DB: `botly`              |
+| **MinIO API (S3)**          | `http://localhost:9000` | Access/Secret: `minioadmin` / `minioadmin` |
+| **MinIO Console**           | `http://localhost:9001` | S3 bucket: `botly-documents`               |
+| **Inngest Dev Server**      | `http://localhost:8288` | `npx inngest-cli@latest dev`               |
 
 ---
 
@@ -56,6 +56,7 @@ bun install
 ### 2. Configure Environment
 
 Copy `.env.example` to `.env` and configure your API keys:
+
 - `CLERK_PUBLISHABLE_KEY` & `CLERK_SECRET_KEY`: Clerk dashboard authentication
 - `MISTRAL_API_KEY`: Mistral AI embeddings and text generation
 - `INTERNAL_API_SECRET`: Secret header for internal worker status updates
@@ -92,7 +93,8 @@ cd packages/inngest && npx inngest-cli@latest dev
 ## API Routes & Endpoints
 
 ### 1. Bot Management (`packages/api/src/routes/bots.ts`)
-*All dashboard routes require Clerk authentication (`Authorization: Bearer <token>`)*
+
+_All dashboard routes require Clerk authentication (`Authorization: Bearer <token>`)_
 
 - `POST /api/bots` - Create a bot (name, system prompt, widget theme)
 - `GET /api/bots` - List all bots for the active Clerk organization
@@ -102,6 +104,7 @@ cd packages/inngest && npx inngest-cli@latest dev
 - `GET /api/bots/:botId/embed-snippet` - Return copy-paste `<script>` embed snippet
 
 ### 2. Knowledge Base & Ingestion (`packages/api/src/routes/documents.ts`)
+
 - `POST /api/bots/:botId/documents` - Upload PDF/TXT file (multipart) or submit a URL (JSON)
 - `GET /api/bots/:botId/documents` - List documents, ingestion status, and chunk counts
 - `GET /api/documents/:docId` - Get single document details
@@ -109,7 +112,8 @@ cd packages/inngest && npx inngest-cli@latest dev
 - `DELETE /api/documents/:docId` - Remove document and its S3 object
 
 ### 3. Public Widget & Chat (`packages/api/src/routes/chat.ts`)
-*Public endpoints accessible by external websites without user login*
+
+_Public endpoints accessible by external websites without user login_
 
 - `GET /api/chat/:botId/config` - Retrieve public widget appearance & greetings
 - `POST /api/chat/:botId/conversations` - Start a new visitor chat session
@@ -117,15 +121,18 @@ cd packages/inngest && npx inngest-cli@latest dev
 - `GET /api/chat/:botId/conversations/:convoId/messages` - Fetch paginated message history
 
 ### 4. Analytics & Transcripts (`packages/api/src/routes/analytics.ts`)
+
 - `GET /api/bots/:botId/conversations` - List visitor sessions with message counts & previews
 - `GET /api/bots/:botId/conversations/:convoId` - View full conversation transcript
 - `GET /api/bots/:botId/stats` - Engagement stats (total messages, docs, daily activity)
 - `GET /api/conversations/:convoId/messages` - Direct conversation message history
 
 ### 5. Worker & Internal (`packages/api/src/routes/internal.ts`)
+
 - `PATCH /internal/documents/:docId/status` - Worker status update (secured via `x-internal-secret`)
 
 ### 6. Standalone Embed Script
+
 - `GET /widget.js` - Zero-dependency Shadow DOM embeddable chat widget script
 
 ---
@@ -165,18 +172,18 @@ bun run lint
 
 ## Monorepo Scripts Reference
 
-| Command | Description |
-|---|---|
-| `bun run dev` | Runs `web` (5173) and `api` (3001) concurrently |
-| `bun run dev:web` | Starts the Vite React dashboard |
-| `bun run dev:api` | Starts the Express API server with hot-reload |
-| `bun run test:api` | Runs the `@botly/tests` suite (26 integration tests) |
-| `bun run build` | Builds both `web` and `api` bundles for production |
-| `bun run typecheck` | Typechecks all 8 workspaces without emitting files |
-| `bun run lint` | Lints the monorepo using ESLint |
-| `bun run lint:fix` | Automatically fixes auto-fixable lint issues |
-| `bun run format` | Formats code with Prettier |
-| `bun run db:push` | Synchronizes Drizzle schema with PostgreSQL |
-| `bun run db:studio` | Launches Drizzle Studio GUI for database inspection |
-| `bun run docker:up` | Launches PostgreSQL (`pgvector`) and MinIO containers |
-| `bun run docker:down` | Stops Docker Compose infrastructure services |
+| Command               | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| `bun run dev`         | Runs `web` (5173) and `api` (3001) concurrently       |
+| `bun run dev:web`     | Starts the Vite React dashboard                       |
+| `bun run dev:api`     | Starts the Express API server with hot-reload         |
+| `bun run test:api`    | Runs the `@botly/tests` suite (26 integration tests)  |
+| `bun run build`       | Builds both `web` and `api` bundles for production    |
+| `bun run typecheck`   | Typechecks all 8 workspaces without emitting files    |
+| `bun run lint`        | Lints the monorepo using ESLint                       |
+| `bun run lint:fix`    | Automatically fixes auto-fixable lint issues          |
+| `bun run format`      | Formats code with Prettier                            |
+| `bun run db:push`     | Synchronizes Drizzle schema with PostgreSQL           |
+| `bun run db:studio`   | Launches Drizzle Studio GUI for database inspection   |
+| `bun run docker:up`   | Launches PostgreSQL (`pgvector`) and MinIO containers |
+| `bun run docker:down` | Stops Docker Compose infrastructure services          |

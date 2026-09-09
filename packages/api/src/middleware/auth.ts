@@ -28,7 +28,10 @@ export function requireOrgAuth(
   next: NextFunction
 ): void {
   // Allow test mock auth bypass only when explicitly enabled for test runs
-  if (process.env.TEST_AUTH_ENABLED === "true" || process.env.NODE_ENV === "test") {
+  if (
+    process.env.TEST_AUTH_ENABLED === "true" ||
+    process.env.NODE_ENV === "test"
+  ) {
     const testOrgId = req.headers["x-test-org-id"] as string | undefined
     const testUserId = req.headers["x-test-user-id"] as string | undefined
     if (testOrgId && testUserId) {
@@ -42,7 +45,8 @@ export function requireOrgAuth(
   if (!isAuthenticated || !userId) {
     res.status(401).json({
       error: "Unauthorized",
-      message: "Authentication required. Please provide a valid Clerk session token.",
+      message:
+        "Authentication required. Please provide a valid Clerk session token.",
     })
     return
   }
@@ -50,7 +54,8 @@ export function requireOrgAuth(
   if (!orgId) {
     res.status(403).json({
       error: "Forbidden",
-      message: "No active organization selected. Please select an organization in Clerk.",
+      message:
+        "No active organization selected. Please select an organization in Clerk.",
     })
     return
   }
@@ -62,10 +67,7 @@ export function requireOrgAuth(
 /**
  * Verifies that a bot exists and belongs to the given Clerk organization.
  */
-export async function verifyBotOrgAccess(
-  botId: string,
-  orgId: string
-) {
+export async function verifyBotOrgAccess(botId: string, orgId: string) {
   const [bot] = await db
     .select()
     .from(bots)

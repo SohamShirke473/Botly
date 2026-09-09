@@ -58,7 +58,9 @@ export async function validatePublicUrl(urlString: string): Promise<URL> {
     hostname.endsWith(".local") ||
     hostname.endsWith(".localhost")
   ) {
-    throw new Error(`Access to local/internal hostname '${hostname}' is prohibited`)
+    throw new Error(
+      `Access to local/internal hostname '${hostname}' is prohibited`
+    )
   }
 
   // Check raw IP in hostname if direct IP was specified
@@ -82,7 +84,6 @@ export async function validatePublicUrl(urlString: string): Promise<URL> {
 
   return url
 }
-
 
 /**
  * Core document processing logic:

@@ -10,25 +10,38 @@ import { eq } from "drizzle-orm"
 // Keeps track of open SSE Response objects for each active visitor conversation
 const visitorStreams = new Map<string, Set<Response>>()
 
-export function registerVisitorStream(conversationId: string, res: Response): () => void {
+export function registerVisitorStream(
+  conversationId: string,
+  res: Response
+): () => void {
   let set = visitorStreams.get(conversationId)
   if (!set) {
     set = new Set()
     visitorStreams.set(conversationId, set)
   }
   set.add(res)
-  logger.info({ conversationId, count: set.size }, "[Realtime] Visitor SSE client registered")
+  logger.info(
+    { conversationId, count: set.size },
+    "[Realtime] Visitor SSE client registered"
+  )
 
   return () => {
     set.delete(res)
     if (set.size === 0) {
       visitorStreams.delete(conversationId)
     }
-    logger.info({ conversationId, remaining: set.size }, "[Realtime] Visitor SSE client disconnected")
+    logger.info(
+      { conversationId, remaining: set.size },
+      "[Realtime] Visitor SSE client disconnected"
+    )
   }
 }
 
-export function pushToVisitor(conversationId: string, event: string, data: unknown): void {
+export function pushToVisitor(
+  conversationId: string,
+  event: string,
+  data: unknown
+): void {
   const set = visitorStreams.get(conversationId)
   if (!set || set.size === 0) return
 
@@ -43,7 +56,10 @@ export function pushToVisitor(conversationId: string, event: string, data: unkno
         ;(res as any).flush()
       }
     } catch (err) {
-      logger.warn({ err, conversationId }, "[Realtime] Error writing to visitor SSE stream")
+      logger.warn(
+        { err, conversationId },
+        "[Realtime] Error writing to visitor SSE stream"
+      )
     }
   }
 }
@@ -60,14 +76,20 @@ interface AdminClient {
 
 const adminClients = new Set<AdminClient>()
 
-export function broadcastToOrg(orgId: string, event: { type: string; payload: unknown }): void {
+export function broadcastToOrg(
+  orgId: string,
+  event: { type: string; payload: unknown }
+): void {
   const msg = JSON.stringify(event)
   for (const client of adminClients) {
     if (client.orgId === orgId && client.ws.readyState === WebSocket.OPEN) {
       try {
         client.ws.send(msg)
       } catch (err) {
-        logger.warn({ err, orgId }, "[Realtime] Failed to send WS message to admin client")
+        logger.warn(
+          { err, orgId },
+          "[Realtime] Failed to send WS message to admin client"
+        )
       }
     }
   }
@@ -79,11 +101,17 @@ export function broadcastToConversation(
 ): void {
   const msg = JSON.stringify(event)
   for (const client of adminClients) {
-    if (client.subscribedConvoId === conversationId && client.ws.readyState === WebSocket.OPEN) {
+    if (
+      client.subscribedConvoId === conversationId &&
+      client.ws.readyState === WebSocket.OPEN
+    ) {
       try {
         client.ws.send(msg)
       } catch (err) {
-        logger.warn({ err, conversationId }, "[Realtime] Failed to send WS message to convo subscriber")
+        logger.warn(
+          { err, conversationId },
+          "[Realtime] Failed to send WS message to convo subscriber"
+        )
       }
     }
   }
@@ -101,7 +129,10 @@ export function initAdminWebSocketServer(server: HttpServer): WebSocketServer {
       isAlive: true,
     }
     adminClients.add(client)
-    logger.info({ activeAdmins: adminClients.size }, "[Realtime] Admin WS connected")
+    logger.info(
+      { activeAdmins: adminClients.size },
+      "[Realtime] Admin WS connected"
+    )
 
     ws.on("pong", () => {
       client.isAlive = true
@@ -116,7 +147,9 @@ export function initAdminWebSocketServer(server: HttpServer): WebSocketServer {
             client.orgId = data.orgId
             client.agentId = data.agentId
             client.agentName = data.agentName || "Agent"
-            ws.send(JSON.stringify({ type: "authenticated", orgId: client.orgId }))
+            ws.send(
+              JSON.stringify({ type: "authenticated", orgId: client.orgId })
+            )
             break
           }
 
@@ -224,7 +257,10 @@ export function initAdminWebSocketServer(server: HttpServer): WebSocketServer {
 
     ws.on("close", () => {
       adminClients.delete(client)
-      logger.info({ remainingAdmins: adminClients.size }, "[Realtime] Admin WS disconnected")
+      logger.info(
+        { remainingAdmins: adminClients.size },
+        "[Realtime] Admin WS disconnected"
+      )
     })
 
     ws.on("error", (err) => {

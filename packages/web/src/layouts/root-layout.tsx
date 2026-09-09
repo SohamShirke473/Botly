@@ -81,20 +81,20 @@ export function RootLayout() {
     <SidebarProvider>
       <Sidebar collapsible="icon">
         {/* Sidebar Header with Logo & Org Switcher */}
-        <SidebarHeader className="p-2 space-y-2 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:items-center">
+        <SidebarHeader className="space-y-2 p-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
           <Link
             to="/dashboard"
-            className="flex items-center gap-2.5 rounded-lg p-2 transition-colors hover:bg-sidebar-accent/50 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center"
+            className="hover:bg-sidebar-accent/50 flex items-center gap-2.5 rounded-lg p-2 transition-colors group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
             title="Botly Dashboard"
           >
-            <div className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg font-semibold text-xs tracking-tight shadow-xs transition-transform group-hover:scale-105">
+            <div className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold tracking-tight shadow-xs transition-transform group-hover:scale-105">
               <Bot className="size-4.5" />
             </div>
-            <div className="flex flex-col group-data-[collapsible=icon]:hidden min-w-0">
-              <span className="text-sm font-semibold tracking-tight text-foreground leading-none">
+            <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
+              <span className="text-foreground text-sm leading-none font-semibold tracking-tight">
                 Botly
               </span>
-              <span className="text-[10px] text-muted-foreground font-mono mt-1">
+              <span className="text-muted-foreground mt-1 font-mono text-[10px]">
                 AI Knowledge Hub
               </span>
             </div>
@@ -124,24 +124,24 @@ export function RootLayout() {
           <button
             type="button"
             onClick={() => setCommandOpen(true)}
-            className="w-full flex items-center justify-between h-8 px-2.5 rounded-lg border border-border/80 bg-card/60 hover:bg-card text-muted-foreground hover:text-foreground text-xs transition-colors group-data-[collapsible=icon]:hidden cursor-pointer shadow-2xs"
+            className="border-border/80 bg-card/60 hover:bg-card text-muted-foreground hover:text-foreground flex h-8 w-full cursor-pointer items-center justify-between rounded-lg border px-2.5 text-xs shadow-2xs transition-colors group-data-[collapsible=icon]:hidden"
           >
             <span className="flex items-center gap-2">
-              <Search className="size-3.5 text-muted-foreground/80" />
+              <Search className="text-muted-foreground/80 size-3.5" />
               <span className="text-[11px]">Search or jump to...</span>
             </span>
-            <kbd className="font-mono text-[10px] text-muted-foreground bg-muted/70 border border-border px-1.5 py-0.2 rounded">
+            <kbd className="text-muted-foreground bg-muted/70 border-border py-0.2 rounded border px-1.5 font-mono text-[10px]">
               ⌘K
             </kbd>
           </button>
 
           {/* Quick Search Trigger (Collapsed) */}
-          <div className="hidden group-data-[collapsible=icon]:flex justify-center w-full">
+          <div className="hidden w-full justify-center group-data-[collapsible=icon]:flex">
             <button
               type="button"
               onClick={() => setCommandOpen(true)}
               title="Quick Search (⌘K)"
-              className="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
+              className="text-muted-foreground hover:text-foreground hover:bg-sidebar-accent flex size-8 cursor-pointer items-center justify-center rounded-lg transition-colors"
             >
               <Search className="size-4" />
             </button>
@@ -154,11 +154,11 @@ export function RootLayout() {
           {/* Section 1: Assistant Bots */}
           <SidebarGroup>
             <div className="flex items-center justify-between px-2 py-1 group-data-[collapsible=icon]:hidden">
-              <SidebarGroupLabel className="text-muted-foreground/80 text-[11px] font-medium tracking-wider uppercase p-0 h-auto">
+              <SidebarGroupLabel className="text-muted-foreground/80 h-auto p-0 text-[11px] font-medium tracking-wider uppercase">
                 Assistant Bots
               </SidebarGroupLabel>
               {botsQuery.data && (
-                <span className="text-[10px] font-mono font-medium text-muted-foreground bg-muted px-1.5 py-0.2 rounded-full">
+                <span className="text-muted-foreground bg-muted py-0.2 rounded-full px-1.5 font-mono text-[10px] font-medium">
                   {botCount}
                 </span>
               )}
@@ -190,18 +190,19 @@ export function RootLayout() {
                 </SidebarMenuItem>
 
                 {/* Direct Dynamic Bot List */}
-                {botsQuery.data && botsQuery.data.slice(0, 5).map((bot) => (
-                  <SidebarMenuItem key={bot.id}>
-                    <SidebarMenuButton
-                      render={<NavLink to={`/dashboard/bots/${bot.id}`} />}
-                      tooltip={bot.name}
-                      isActive={pathname === `/dashboard/bots/${bot.id}`}
-                    >
-                      <Bot className="size-3.5 shrink-0" />
-                      <span className="truncate">{bot.name}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {botsQuery.data &&
+                  botsQuery.data.slice(0, 5).map((bot) => (
+                    <SidebarMenuItem key={bot.id}>
+                      <SidebarMenuButton
+                        render={<NavLink to={`/dashboard/bots/${bot.id}`} />}
+                        tooltip={bot.name}
+                        isActive={pathname === `/dashboard/bots/${bot.id}`}
+                      >
+                        <Bot className="size-3.5 shrink-0" />
+                        <span className="truncate">{bot.name}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
 
                 {/* Create Bot */}
                 <SidebarMenuItem>
@@ -210,7 +211,7 @@ export function RootLayout() {
                     tooltip="Create Bot"
                     isActive={pathname === "/dashboard/bots/new"}
                   >
-                    <Plus className="size-4 text-primary" />
+                    <Plus className="text-primary size-4" />
                     <span className="text-primary font-medium">Create Bot</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -221,7 +222,7 @@ export function RootLayout() {
           {/* Section 2: Workspace Management */}
           <SidebarGroup>
             <div className="px-2 py-1 group-data-[collapsible=icon]:hidden">
-              <SidebarGroupLabel className="text-muted-foreground/80 text-[11px] font-medium tracking-wider uppercase p-0 h-auto">
+              <SidebarGroupLabel className="text-muted-foreground/80 h-auto p-0 text-[11px] font-medium tracking-wider uppercase">
                 Workspace
               </SidebarGroupLabel>
             </div>
@@ -266,15 +267,17 @@ export function RootLayout() {
 
         {/* Workspace Plan Quota Card */}
         <div className="p-2 group-data-[collapsible=icon]:hidden">
-          <div className="rounded-xl border border-border/80 bg-card/80 p-3 shadow-2xs space-y-2.5">
+          <div className="border-border/80 bg-card/80 space-y-2.5 rounded-xl border p-3 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-foreground">Starter Workspace</span>
-              <Badge variant="secondary" className="text-[9px] font-mono">
+              <span className="text-foreground text-[11px] font-semibold">
+                Starter Workspace
+              </span>
+              <Badge variant="secondary" className="font-mono text-[9px]">
                 Free Tier
               </Badge>
             </div>
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="text-muted-foreground flex items-center justify-between text-[10px]">
                 <span>Active Bots Quota</span>
                 <span className="font-mono">{botCount} / 5</span>
               </div>
@@ -286,7 +289,7 @@ export function RootLayout() {
             <button
               type="button"
               onClick={() => setCheckoutOpen(true)}
-              className="w-full flex items-center justify-center h-7 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground text-xs font-medium transition-all cursor-pointer shadow-2xs"
+              className="bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground flex h-7 w-full cursor-pointer items-center justify-center rounded-lg text-xs font-medium shadow-2xs transition-all"
             >
               <span>Upgrade to Pro</span>
             </button>
@@ -294,12 +297,12 @@ export function RootLayout() {
         </div>
 
         {/* Collapsed Upgrade Trigger */}
-        <div className="hidden group-data-[collapsible=icon]:flex justify-center p-2">
+        <div className="hidden justify-center p-2 group-data-[collapsible=icon]:flex">
           <button
             type="button"
             onClick={() => setCheckoutOpen(true)}
             title="Upgrade Workspace Plan"
-            className="size-8 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors cursor-pointer"
+            className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex size-8 cursor-pointer items-center justify-center rounded-lg transition-colors"
           >
             <CreditCard className="size-4" />
           </button>
@@ -308,9 +311,9 @@ export function RootLayout() {
         <SidebarSeparator />
 
         {/* Footer */}
-        <SidebarFooter className="p-2 space-y-1 group-data-[collapsible=icon]:items-center">
-          <div className="flex items-center justify-between px-2 py-1 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center">
-            <span className="text-[11px] text-muted-foreground font-mono group-data-[collapsible=icon]:hidden">
+        <SidebarFooter className="space-y-1 p-2 group-data-[collapsible=icon]:items-center">
+          <div className="flex items-center justify-between px-2 py-1 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
+            <span className="text-muted-foreground font-mono text-[11px] group-data-[collapsible=icon]:hidden">
               v1.0.0
             </span>
             <ThemeToggle />
@@ -320,13 +323,16 @@ export function RootLayout() {
 
       <SidebarInset>
         <header className="border-border/70 bg-background/80 sticky top-0 z-40 flex h-12 items-center gap-2.5 border-b px-4 backdrop-blur-md">
-          <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
-          <div className="h-4 w-px bg-border/80" />
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
+          <SidebarTrigger className="text-muted-foreground hover:text-foreground -ml-1" />
+          <div className="bg-border/80 h-4 w-px" />
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-1.5 text-xs"
+          >
             {breadcrumbs.map((crumb, idx) => (
               <span key={idx} className="flex items-center gap-1.5">
                 {idx > 0 && (
-                  <ChevronRight className="size-3 text-muted-foreground/50" />
+                  <ChevronRight className="text-muted-foreground/50 size-3" />
                 )}
                 {crumb.href ? (
                   <Link
@@ -336,7 +342,7 @@ export function RootLayout() {
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="font-medium text-foreground">
+                  <span className="text-foreground font-medium">
                     {crumb.label}
                   </span>
                 )}
@@ -362,10 +368,7 @@ export function RootLayout() {
       </SidebarInset>
 
       {/* Global Modals */}
-      <CommandDialog
-        open={commandOpen}
-        onOpenChange={setCommandOpen}
-      />
+      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen} />
       <CheckoutDialog
         open={checkoutOpen}
         onOpenChange={setCheckoutOpen}

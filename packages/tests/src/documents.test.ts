@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
-import { startTestServer, stopTestServer, getBaseUrl, authHeaders, TEST_ORG_ID } from "./setup"
+import {
+  startTestServer,
+  stopTestServer,
+  getBaseUrl,
+  authHeaders,
+  TEST_ORG_ID,
+} from "./setup"
 import { db } from "db"
 import { bots, documents } from "db/schema"
 import { eq } from "drizzle-orm"
@@ -30,9 +36,12 @@ describe("Documents & Ingestion Routes", () => {
 
   it("POST /api/bots/:botId/documents uploads a text file via multipart form", async () => {
     const formData = new FormData()
-    const blob = new Blob(["Documentation snippet: API rate limit is 100 requests per minute."], {
-      type: "text/plain",
-    })
+    const blob = new Blob(
+      ["Documentation snippet: API rate limit is 100 requests per minute."],
+      {
+        type: "text/plain",
+      }
+    )
     formData.append("file", blob, "limits.txt")
 
     const res = await fetch(`${getBaseUrl()}/api/bots/${botId}/documents`, {
@@ -95,10 +104,13 @@ describe("Documents & Ingestion Routes", () => {
   })
 
   it("POST /api/documents/:docId/reprocess triggers reprocessing", async () => {
-    const res = await fetch(`${getBaseUrl()}/api/documents/${uploadedDocId}/reprocess`, {
-      method: "POST",
-      headers: authHeaders,
-    })
+    const res = await fetch(
+      `${getBaseUrl()}/api/documents/${uploadedDocId}/reprocess`,
+      {
+        method: "POST",
+        headers: authHeaders,
+      }
+    )
 
     expect(res.status).toBe(200)
     const data = await res.json()
@@ -112,7 +124,10 @@ describe("Documents & Ingestion Routes", () => {
     })
 
     expect(res.status).toBe(204)
-    const [check] = await db.select().from(documents).where(eq(documents.id, urlDocId))
+    const [check] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, urlDocId))
     expect(check).toBeUndefined()
   })
 })

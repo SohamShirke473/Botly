@@ -8,8 +8,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-heading: "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
-  --font-serif: "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
+  --font-heading:
+    "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
+  --font-serif:
+    "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
   --font-sans:
     "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -70,15 +72,15 @@
   --radius: 8px;
 
   /* ICHIGO ICHIE — 一期一会 Zen Light Palette */
-  --background: #f6f1e6;       /* Washi Cream Paper */
-  --foreground: #2b2a28;       /* Deep Sumi Ink */
-  --card: #efe8d8;             /* Soft Linen Surface */
+  --background: #f6f1e6; /* Washi Cream Paper */
+  --foreground: #2b2a28; /* Deep Sumi Ink */
+  --card: #efe8d8; /* Soft Linen Surface */
   --card-foreground: #2b2a28;
   --popover: #f6f1e6;
   --popover-foreground: #2b2a28;
-  --primary: #b03a2e;          /* Japanese Vermilion / Akane Lacquer Accent */
+  --primary: #b03a2e; /* Japanese Vermilion / Akane Lacquer Accent */
   --primary-foreground: #f6f1e6;
-  --secondary: #e6dfcf;        /* Subtle Paper Tone */
+  --secondary: #e6dfcf; /* Subtle Paper Tone */
   --secondary-foreground: #2b2a28;
   --muted: #e7dfce;
   --muted-foreground: #5a5750; /* Stone Gray */
@@ -86,7 +88,7 @@
   --accent-foreground: #2b2a28;
   --destructive: #b03a2e;
   --destructive-foreground: #f6f1e6;
-  --border: #dfd6c4;           /* Parchment Border */
+  --border: #dfd6c4; /* Parchment Border */
   --input: #dfd6c4;
   --ring: #b03a2e;
 
@@ -115,13 +117,13 @@
 
 .dark {
   /* ICHIGO ICHIE — 一期一会 Zen Dark Palette (Sumi & Washi) */
-  --background: #191816;       /* Deep Sumi Canvas */
-  --foreground: #f6f1e6;       /* Washi White */
-  --card: #22201d;             /* Charred Wood Surface */
+  --background: #191816; /* Deep Sumi Canvas */
+  --foreground: #f6f1e6; /* Washi White */
+  --card: #22201d; /* Charred Wood Surface */
   --card-foreground: #f6f1e6;
   --popover: #22201d;
   --popover-foreground: #f6f1e6;
-  --primary: #c94a3d;          /* Radiant Vermilion */
+  --primary: #c94a3d; /* Radiant Vermilion */
   --primary-foreground: #ffffff;
   --secondary: #2b2925;
   --secondary-foreground: #f6f1e6;
@@ -172,7 +174,8 @@
 
 /* Custom Mincho font utility */
 .font-mincho {
-  font-family: "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
+  font-family:
+    "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
 }
 
 /* Kanji Lacquer Seal */
@@ -183,7 +186,8 @@
   border-radius: 4px;
   background-color: var(--primary);
   color: var(--primary-foreground);
-  font-family: "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
+  font-family:
+    "Hiragino Mincho ProN", "Shippori Mincho", "Noto Serif JP", serif;
   font-weight: 700;
   letter-spacing: 0.05em;
   box-shadow: 0 1px 3px rgba(176, 58, 46, 0.25);

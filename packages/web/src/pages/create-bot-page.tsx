@@ -67,7 +67,7 @@ export function CreateBotPage() {
       <button
         type="button"
         onClick={() => navigate("/dashboard")}
-        className="text-muted-foreground hover:text-foreground mb-4 flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
+        className="text-muted-foreground hover:text-foreground mb-4 flex cursor-pointer items-center gap-1.5 text-xs transition-colors"
       >
         <ArrowLeft className="size-3.5" />
         <span>Back to Bots</span>
@@ -75,10 +75,10 @@ export function CreateBotPage() {
 
       <Card className="border-border/80 shadow-xs">
         <CardHeader className="pb-4">
-          <div className="bg-primary/5 text-primary mb-2 flex size-9 items-center justify-center rounded-lg ring-1 ring-primary/10">
+          <div className="bg-primary/5 text-primary ring-primary/10 mb-2 flex size-9 items-center justify-center rounded-lg ring-1">
             <Bot className="size-4.5" />
           </div>
-          <CardTitle className="text-base font-semibold text-foreground">
+          <CardTitle className="text-foreground text-base font-semibold">
             Create New Bot
           </CardTitle>
           <CardDescription className="text-xs">
@@ -101,7 +101,7 @@ export function CreateBotPage() {
                 onChange={(e) => setName(e.target.value)}
                 required
                 maxLength={100}
-                className="h-8.5 text-xs bg-background"
+                className="bg-background h-8.5 text-xs"
                 autoFocus
               />
             </div>
@@ -109,20 +109,17 @@ export function CreateBotPage() {
             {/* Prompt Field */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label
-                  htmlFor="system-prompt"
-                  className="text-xs font-medium"
-                >
+                <Label htmlFor="system-prompt" className="text-xs font-medium">
                   System Instructions
                 </Label>
-                <span className="font-mono text-[10px] text-muted-foreground">
+                <span className="text-muted-foreground font-mono text-[10px]">
                   {systemPrompt.length} / 4000
                 </span>
               </div>
 
               {/* Starter Presets */}
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] text-muted-foreground mr-1">
+                <span className="text-muted-foreground mr-1 text-[11px]">
                   Presets:
                 </span>
                 {PROMPT_PRESETS.map((preset) => (
@@ -130,7 +127,7 @@ export function CreateBotPage() {
                     key={preset.name}
                     type="button"
                     onClick={() => setSystemPrompt(preset.prompt)}
-                    className="text-[11px] px-2 py-0.5 rounded-md border border-border bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    className="border-border bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer rounded-md border px-2 py-0.5 text-[11px] transition-colors"
                   >
                     {preset.name}
                   </button>
@@ -144,16 +141,16 @@ export function CreateBotPage() {
                 onChange={(e) => setSystemPrompt(e.target.value)}
                 rows={5}
                 maxLength={4000}
-                className="text-xs leading-relaxed bg-background font-mono text-[12px]"
+                className="bg-background font-mono text-xs text-[12px] leading-relaxed"
               />
               <p className="text-muted-foreground text-[11px]">
-                Defines tone, scope, and boundary conditions when answering customer
-                queries.
+                Defines tone, scope, and boundary conditions when answering
+                customer queries.
               </p>
             </div>
           </CardContent>
 
-          <CardFooter className="flex items-center justify-end gap-2 border-t border-border/60 bg-muted/20 px-6 py-3">
+          <CardFooter className="border-border/60 bg-muted/20 flex items-center justify-end gap-2 border-t px-6 py-3">
             <Button
               type="button"
               variant="outline"

@@ -38,31 +38,40 @@ describe("Internal Worker Endpoints", () => {
   })
 
   it("PATCH /internal/documents/:docId/status without secret returns 401 Unauthorized", async () => {
-    const res = await fetch(`${getBaseUrl()}/internal/documents/${docId}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "ready" }),
-    })
+    const res = await fetch(
+      `${getBaseUrl()}/internal/documents/${docId}/status`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "ready" }),
+      }
+    )
 
     expect(res.status).toBe(401)
   })
 
   it("PATCH /internal/documents/:docId/status with valid secret updates document status", async () => {
-    const res = await fetch(`${getBaseUrl()}/internal/documents/${docId}/status`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "x-internal-secret": "dev-botly-internal-secret-key-32chars",
-      },
-      body: JSON.stringify({ status: "ready" }),
-    })
+    const res = await fetch(
+      `${getBaseUrl()}/internal/documents/${docId}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-secret": "dev-botly-internal-secret-key-32chars",
+        },
+        body: JSON.stringify({ status: "ready" }),
+      }
+    )
 
     expect(res.status).toBe(200)
     const data = await res.json()
     expect(data.success).toBe(true)
     expect(data.status).toBe("ready")
 
-    const [doc] = await db.select().from(documents).where(eq(documents.id, docId))
+    const [doc] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, docId))
     expect(doc.status).toBe("ready")
   })
 })

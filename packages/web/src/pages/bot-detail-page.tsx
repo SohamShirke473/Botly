@@ -70,13 +70,13 @@ export function BotDetailPage() {
   const bot = botQuery.data
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
       {/* Header Area */}
       <div>
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
-          className="text-muted-foreground hover:text-foreground mb-3 flex items-center gap-1.5 text-xs transition-colors cursor-pointer"
+          className="text-muted-foreground hover:text-foreground mb-3 flex cursor-pointer items-center gap-1.5 text-xs transition-colors"
         >
           <ArrowLeft className="size-3.5" />
           <span>Back to Bots</span>
@@ -84,28 +84,28 @@ export function BotDetailPage() {
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="bg-primary/5 text-primary flex size-11 items-center justify-center rounded-xl ring-1 ring-primary/10 shrink-0">
+            <div className="bg-primary/5 text-primary ring-primary/10 flex size-11 shrink-0 items-center justify-center rounded-xl ring-1">
               <BotIcon className="size-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-foreground text-xl font-bold tracking-tight">
                   {bot.name}
                 </h1>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-status-ready/15 px-2.5 py-0.5 text-[11px] font-medium text-status-ready border border-status-ready/20">
-                  <span className="size-1.5 rounded-full bg-status-ready animate-pulse" />
+                <span className="bg-status-ready/15 text-status-ready border-status-ready/20 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium">
+                  <span className="bg-status-ready size-1.5 animate-pulse rounded-full" />
                   Active
                 </span>
               </div>
-              <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs flex-wrap">
+              <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-xs">
                 <span className="flex items-center gap-1 text-[11px]">
-                  <Clock className="size-3 text-muted-foreground/70" />
+                  <Clock className="text-muted-foreground/70 size-3" />
                   Created {new Date(bot.created_at).toLocaleDateString()}
                 </span>
                 {bot.system_prompt && (
                   <>
                     <span className="text-border">•</span>
-                    <span className="text-[11px] text-muted-foreground/80">
+                    <span className="text-muted-foreground/80 text-[11px]">
                       Custom Prompt Configured
                     </span>
                   </>
@@ -119,38 +119,38 @@ export function BotDetailPage() {
       {/* Tabs Hub */}
       <Tabs defaultValue="knowledge-base" className="space-y-6">
         <div className="overflow-x-auto pb-0.5">
-          <TabsList className="h-10 p-1 bg-muted/60 border border-border/70 rounded-xl inline-flex items-center gap-1">
+          <TabsList className="bg-muted/60 border-border/70 inline-flex h-10 items-center gap-1 rounded-xl border p-1">
             <TabsTrigger
               value="knowledge-base"
-              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer gap-2 rounded-lg border border-transparent px-3.5 py-1.5 text-xs font-medium transition-all data-active:font-semibold data-active:shadow-xs data-[state=active]:font-semibold data-[state=active]:shadow-xs"
             >
               <Database className="size-3.5 shrink-0" />
               <span>Knowledge Base</span>
             </TabsTrigger>
             <TabsTrigger
               value="install"
-              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer gap-2 rounded-lg border border-transparent px-3.5 py-1.5 text-xs font-medium transition-all data-active:font-semibold data-active:shadow-xs data-[state=active]:font-semibold data-[state=active]:shadow-xs"
             >
               <Code2 className="size-3.5 shrink-0" />
               <span>Install Widget</span>
             </TabsTrigger>
             <TabsTrigger
               value="conversations"
-              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer gap-2 rounded-lg border border-transparent px-3.5 py-1.5 text-xs font-medium transition-all data-active:font-semibold data-active:shadow-xs data-[state=active]:font-semibold data-[state=active]:shadow-xs"
             >
               <MessageSquareText className="size-3.5 shrink-0" />
               <span>Conversations</span>
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer gap-2 rounded-lg border border-transparent px-3.5 py-1.5 text-xs font-medium transition-all data-active:font-semibold data-active:shadow-xs data-[state=active]:font-semibold data-[state=active]:shadow-xs"
             >
               <BarChart3 className="size-3.5 shrink-0" />
               <span>Analytics</span>
             </TabsTrigger>
             <TabsTrigger
               value="settings"
-              className="gap-2 text-xs font-medium px-3.5 py-1.5 rounded-lg text-muted-foreground transition-all hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:font-semibold data-[state=active]:font-semibold data-active:shadow-xs data-[state=active]:shadow-xs border border-transparent data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/40 data-active:bg-card data-[state=active]:bg-card data-active:text-foreground data-[state=active]:text-foreground data-active:border-border/60 data-[state=active]:border-border/60 cursor-pointer gap-2 rounded-lg border border-transparent px-3.5 py-1.5 text-xs font-medium transition-all data-active:font-semibold data-active:shadow-xs data-[state=active]:font-semibold data-[state=active]:shadow-xs"
             >
               <Settings className="size-3.5 shrink-0" />
               <span>Settings</span>

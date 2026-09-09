@@ -4,7 +4,6 @@ import { tickets, bots, conversations, messages } from "db/schema"
 import { eq, and, desc, sql, asc } from "drizzle-orm"
 import { requireOrgAuth } from "../middleware/auth"
 import { validate } from "../middleware/validate"
-import { logger } from "../lib/logger"
 import {
   pushToVisitor,
   broadcastToConversation,
@@ -232,7 +231,8 @@ ticketsRouter.patch(
     if (status) updates.status = status
     if (priority) updates.priority = priority
     if (assigned_to !== undefined) updates.assignedTo = assigned_to
-    if (assigned_to_name !== undefined) updates.assignedToName = assigned_to_name
+    if (assigned_to_name !== undefined)
+      updates.assignedToName = assigned_to_name
 
     // If assigning to self and name wasn't passed
     if (assigned_to === userId && !assigned_to_name) {
@@ -258,7 +258,8 @@ ticketsRouter.patch(
       // Push resolution notice to visitor SSE
       pushToVisitor(existing.conversationId, "handoff_status", {
         status: "resolved",
-        message: "Your support session has been resolved. Feel free to ask more questions anytime!",
+        message:
+          "Your support session has been resolved. Feel free to ask more questions anytime!",
       })
     } else if (status === "in_progress") {
       await db

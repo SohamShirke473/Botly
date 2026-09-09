@@ -71,11 +71,16 @@ describe("@botly/ai - Embeddings (Mistral)", () => {
 
   it("embedManyTexts generates embeddings for multiple strings", async () => {
     if (!process.env.MISTRAL_API_KEY) {
-      console.warn("Skipping live embedding batch test: MISTRAL_API_KEY missing")
+      console.warn(
+        "Skipping live embedding batch test: MISTRAL_API_KEY missing"
+      )
       return
     }
 
-    const res = await embedManyTexts(["First test document", "Second test document"])
+    const res = await embedManyTexts([
+      "First test document",
+      "Second test document",
+    ])
     expect(res.embeddings.length).toBe(2)
     expect(res.embeddings[0].length).toBe(MISTRAL_EMBED_DIMENSIONS)
     expect(res.embeddings[1].length).toBe(MISTRAL_EMBED_DIMENSIONS)

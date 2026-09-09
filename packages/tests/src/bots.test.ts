@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
-import { startTestServer, stopTestServer, getBaseUrl, authHeaders, TEST_ORG_ID } from "./setup"
+import {
+  startTestServer,
+  stopTestServer,
+  getBaseUrl,
+  authHeaders,
+  TEST_ORG_ID,
+} from "./setup"
 import { db } from "db"
 import { bots, documents } from "db/schema"
 import { eq } from "drizzle-orm"
@@ -91,9 +97,12 @@ describe("Bot CRUD & Organization Scoping", () => {
   })
 
   it("GET /api/bots/:botId/embed-snippet returns copy-paste script tag", async () => {
-    const res = await fetch(`${getBaseUrl()}/api/bots/${createdBotId}/embed-snippet`, {
-      headers: authHeaders,
-    })
+    const res = await fetch(
+      `${getBaseUrl()}/api/bots/${createdBotId}/embed-snippet`,
+      {
+        headers: authHeaders,
+      }
+    )
 
     expect(res.status).toBe(200)
     const data = await res.json()
@@ -120,11 +129,17 @@ describe("Bot CRUD & Organization Scoping", () => {
     expect(res.status).toBe(204)
 
     // Verify bot is deleted from DB
-    const [botCheck] = await db.select().from(bots).where(eq(bots.id, createdBotId))
+    const [botCheck] = await db
+      .select()
+      .from(bots)
+      .where(eq(bots.id, createdBotId))
     expect(botCheck).toBeUndefined()
 
     // Verify document was cascade deleted
-    const [docCheck] = await db.select().from(documents).where(eq(documents.id, doc.id))
+    const [docCheck] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, doc.id))
     expect(docCheck).toBeUndefined()
   })
 })

@@ -1,11 +1,15 @@
 import { Router, type Request, type Response } from "express"
 import { db } from "db"
-import { bots, conversations, messages, documents, chunks, tickets } from "db/schema"
-import { eq, and, desc, asc, sql } from "drizzle-orm"
 import {
-  requireOrgAuth,
-  verifyBotOrgAccess,
-} from "../middleware/auth"
+  bots,
+  conversations,
+  messages,
+  documents,
+  chunks,
+  tickets,
+} from "db/schema"
+import { eq, and, desc, asc, sql } from "drizzle-orm"
+import { requireOrgAuth, verifyBotOrgAccess } from "../middleware/auth"
 import { validate } from "../middleware/validate"
 import {
   pushToVisitor,
@@ -117,9 +121,7 @@ analyticsRouter.get(
     const [convo] = await db
       .select()
       .from(conversations)
-      .where(
-        and(eq(conversations.id, convoId), eq(conversations.botId, botId))
-      )
+      .where(and(eq(conversations.id, convoId), eq(conversations.botId, botId)))
       .limit(1)
 
     if (!convo) {

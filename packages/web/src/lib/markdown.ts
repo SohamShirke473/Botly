@@ -61,28 +61,30 @@ export function renderMarkdown(rawText: string): string {
     } else if ((m = line.match(/^#\s+(.+)$/))) {
       output.push(`<div class="md-h1">${applyInline(escapeHtml(m[1]))}</div>`)
 
-    // Horizontal rule
+      // Horizontal rule
     } else if (/^[-*]{3,}$/.test(line)) {
       output.push(`<hr class="md-hr">`)
 
-    // Ordered list item: "1. text"
+      // Ordered list item: "1. text"
     } else if ((m = line.match(/^(\d+)\.\s+(.+)$/))) {
       output.push(
         `<div class="md-ol-item">` +
           `<span class="md-ol-num">${m[1]}.</span>` +
           `\u00a0${applyInline(escapeHtml(m[2]))}` +
-        `</div>`
+          `</div>`
       )
 
-    // Unordered list item: "- text" or "* text"
+      // Unordered list item: "- text" or "* text"
     } else if ((m = line.match(/^[-*]\s+(.+)$/))) {
-      output.push(`<div class="md-li">\u2022\u00a0${applyInline(escapeHtml(m[1]))}</div>`)
+      output.push(
+        `<div class="md-li">\u2022\u00a0${applyInline(escapeHtml(m[1]))}</div>`
+      )
 
-    // Empty line — renders as a small visual gap
+      // Empty line — renders as a small visual gap
     } else if (line.trim() === "") {
       output.push(`<div class="md-empty"></div>`)
 
-    // Regular paragraph line
+      // Regular paragraph line
     } else {
       output.push(`<div class="md-p">${applyInline(escapeHtml(line))}</div>`)
     }

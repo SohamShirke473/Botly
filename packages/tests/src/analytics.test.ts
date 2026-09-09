@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
-import { startTestServer, stopTestServer, getBaseUrl, authHeaders, TEST_ORG_ID } from "./setup"
+import {
+  startTestServer,
+  stopTestServer,
+  getBaseUrl,
+  authHeaders,
+  TEST_ORG_ID,
+} from "./setup"
 import { db } from "db"
 import { bots, conversations, messages } from "db/schema"
 import { eq } from "drizzle-orm"

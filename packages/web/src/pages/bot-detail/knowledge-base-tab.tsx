@@ -38,7 +38,11 @@ import {
 
 const STATUS_CONFIG: Record<
   string,
-  { label: string; className: string; icon: React.ComponentType<{ className?: string }> }
+  {
+    label: string
+    className: string
+    icon: React.ComponentType<{ className?: string }>
+  }
 > = {
   ready: {
     label: "Ready",
@@ -47,12 +51,14 @@ const STATUS_CONFIG: Record<
   },
   processing: {
     label: "Processing",
-    className: "bg-status-processing/10 text-status-processing border-status-processing/20",
+    className:
+      "bg-status-processing/10 text-status-processing border-status-processing/20",
     icon: Loader2,
   },
   pending: {
     label: "Pending",
-    className: "bg-status-pending/10 text-status-pending border-status-pending/20",
+    className:
+      "bg-status-pending/10 text-status-pending border-status-pending/20",
     icon: Clock,
   },
   failed: {
@@ -66,7 +72,7 @@ function getDocumentIcon(sourceType: string, filename: string) {
   if (sourceType === "url") return <Globe className="size-3.5 text-blue-500" />
   if (filename.endsWith(".json") || filename.endsWith(".csv"))
     return <FileCode className="size-3.5 text-emerald-500" />
-  return <FileText className="size-3.5 text-muted-foreground" />
+  return <FileText className="text-muted-foreground size-3.5" />
 }
 
 export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
@@ -192,17 +198,18 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
   return (
     <div className="space-y-5">
       {/* Unified Ingestion Container */}
-      <div className="rounded-xl border border-border/80 bg-card p-4 space-y-4 shadow-xs">
+      <div className="border-border/80 bg-card space-y-4 rounded-xl border p-4 shadow-xs">
         <div>
-          <h3 className="text-xs font-semibold text-foreground tracking-wide uppercase">
+          <h3 className="text-foreground text-xs font-semibold tracking-wide uppercase">
             Ingest Knowledge Sources
           </h3>
           <p className="text-muted-foreground mt-0.5 text-xs">
-            Upload product manuals, markdown guides, spreadsheets, or crawl public documentation URLs.
+            Upload product manuals, markdown guides, spreadsheets, or crawl
+            public documentation URLs.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {/* File Drag & Drop */}
           <div
             onDragOver={(e) => {
@@ -234,14 +241,14 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
                 dragOver ? "text-foreground" : "text-muted-foreground"
               }`}
             />
-            <p className="text-xs font-medium text-foreground">
+            <p className="text-foreground text-xs font-medium">
               {dragOver ? "Drop to upload" : "Drop files or click to browse"}
             </p>
-            <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap">
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
               {["PDF", "TXT", "MD", "CSV", "JSON"].map((ext) => (
                 <span
                   key={ext}
-                  className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                  className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]"
                 >
                   {ext}
                 </span>
@@ -250,29 +257,30 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
           </div>
 
           {/* URL Scraper Input */}
-          <div className="rounded-lg border border-border/80 bg-muted/20 p-4 flex flex-col justify-between">
+          <div className="border-border/80 bg-muted/20 flex flex-col justify-between rounded-lg border p-4">
             <div className="space-y-1">
-              <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
-                <Globe className="size-3.5 text-muted-foreground" />
+              <span className="text-foreground flex items-center gap-1.5 text-xs font-medium">
+                <Globe className="text-muted-foreground size-3.5" />
                 Crawl Website Documentation
               </span>
               <p className="text-muted-foreground text-[11px] leading-relaxed">
-                Provide a public webpage URL. Botly will extract text and index vector embeddings.
+                Provide a public webpage URL. Botly will extract text and index
+                vector embeddings.
               </p>
             </div>
-            <form onSubmit={handleUrlSubmit} className="flex gap-2 mt-3">
+            <form onSubmit={handleUrlSubmit} className="mt-3 flex gap-2">
               <Input
                 placeholder="https://docs.yourcompany.com/overview"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                className="h-8 text-xs bg-background flex-1 font-mono text-[12px]"
+                className="bg-background h-8 flex-1 font-mono text-xs text-[12px]"
               />
               <Button
                 type="submit"
                 variant="outline"
                 size="sm"
                 disabled={!urlInput.trim() || submitUrlMutation.isPending}
-                className="gap-1.5 shrink-0"
+                className="shrink-0 gap-1.5"
               >
                 {submitUrlMutation.isPending ? (
                   <Loader2 className="size-3 animate-spin" />
@@ -287,7 +295,7 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
 
         {uploadProgress > 0 && uploadProgress < 100 && (
           <div className="space-y-1.5 pt-1">
-            <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+            <div className="text-muted-foreground flex items-center justify-between font-mono text-[11px]">
               <span>Uploading document...</span>
               <span>{uploadProgress}%</span>
             </div>
@@ -300,7 +308,7 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            <h4 className="text-foreground text-xs font-semibold tracking-wider uppercase">
               Indexed Documents
             </h4>
             <Badge variant="outline" className="font-mono text-[11px]">
@@ -308,13 +316,13 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
             </Badge>
           </div>
           {stats.total > 0 && (
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-3 text-[11px]">
               <span className="flex items-center gap-1">
-                <span className="size-1.5 rounded-full bg-status-ready" />
+                <span className="bg-status-ready size-1.5 rounded-full" />
                 {stats.ready} ready
               </span>
               {stats.processing > 0 && (
-                <span className="flex items-center gap-1 text-status-processing">
+                <span className="text-status-processing flex items-center gap-1">
                   <Loader2 className="size-2.5 animate-spin" />
                   {stats.processing} processing
                 </span>
@@ -330,20 +338,20 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
             ))}
           </div>
         ) : docsQuery.data && docsQuery.data.length > 0 ? (
-          <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
+          <div className="border-border/80 bg-card overflow-hidden rounded-xl border shadow-xs">
             <Table>
               <TableHeader className="bg-muted/30">
                 <TableRow>
-                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                  <TableHead className="text-muted-foreground text-[11px] font-semibold">
                     Document
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                  <TableHead className="text-muted-foreground text-[11px] font-semibold">
                     Status
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                  <TableHead className="text-muted-foreground text-[11px] font-semibold">
                     Chunks
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-muted-foreground">
+                  <TableHead className="text-muted-foreground text-[11px] font-semibold">
                     Source
                   </TableHead>
                   <TableHead className="w-16" />
@@ -359,12 +367,12 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
                     <TableRow
                       key={doc.id}
                       style={{ animationDelay: `${i * 40}ms` }}
-                      className="transition-colors hover:bg-muted/30"
+                      className="hover:bg-muted/30 transition-colors"
                     >
                       <TableCell>
                         <div className="flex items-center gap-2.5">
                           {getDocumentIcon(doc.source_type, doc.filename)}
-                          <span className="text-xs font-medium text-foreground max-w-sm truncate">
+                          <span className="text-foreground max-w-sm truncate text-xs font-medium">
                             {doc.filename}
                           </span>
                         </div>
@@ -372,7 +380,7 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
                       <TableCell>
                         <Badge
                           variant="secondary"
-                          className={`text-[10px] font-medium gap-1 ${status.className}`}
+                          className={`gap-1 text-[10px] font-medium ${status.className}`}
                         >
                           <StatusIcon
                             className={`size-2.5 ${
@@ -396,7 +404,7 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className="font-mono text-[10px] text-muted-foreground"
+                          className="text-muted-foreground font-mono text-[10px]"
                         >
                           {doc.source_type.toUpperCase()}
                         </Badge>
@@ -448,14 +456,14 @@ export function KnowledgeBaseTab({ bot }: { bot: Bot }) {
             </Table>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed bg-card/40 py-12 text-center">
+          <div className="bg-card/40 rounded-xl border border-dashed py-12 text-center">
             <Database className="text-muted-foreground/40 mx-auto mb-2 size-5" />
-            <p className="text-xs font-semibold text-foreground">
+            <p className="text-foreground text-xs font-semibold">
               No documents indexed yet
             </p>
             <p className="text-muted-foreground mt-0.5 text-[11px]">
-              Drag and drop files or add a URL above to build your bot's knowledge
-              base.
+              Drag and drop files or add a URL above to build your bot's
+              knowledge base.
             </p>
           </div>
         )}

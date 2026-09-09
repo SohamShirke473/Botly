@@ -20,23 +20,24 @@ export function SettingsPage() {
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">
+          <h1 className="text-foreground text-xl font-bold tracking-tight">
             Workspace Settings
           </h1>
           <p className="text-muted-foreground mt-0.5 text-xs">
-            Manage your organization context, appearance preferences, and billing.
+            Manage your organization context, appearance preferences, and
+            billing.
           </p>
         </div>
 
         {/* Organization Section */}
         <Card className="border-border/80 shadow-xs">
-          <CardHeader className="pb-3 border-b border-border/60">
+          <CardHeader className="border-border/60 border-b pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="bg-primary/5 text-primary flex size-8 items-center justify-center rounded-lg ring-1 ring-primary/10">
+              <div className="bg-primary/5 text-primary ring-primary/10 flex size-8 items-center justify-center rounded-lg ring-1">
                 <Building2 className="size-4" />
               </div>
               <div>
-                <CardTitle className="text-sm font-semibold text-foreground">
+                <CardTitle className="text-foreground text-sm font-semibold">
                   Active Organization
                 </CardTitle>
                 <CardDescription className="text-xs">
@@ -47,20 +48,23 @@ export function SettingsPage() {
           </CardHeader>
           <CardContent className="pt-4">
             <Show when="signed-in">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 p-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="border-border/70 bg-muted/20 flex items-center justify-between rounded-lg border p-3">
                   <span className="text-muted-foreground text-xs">
                     Organization Context
                   </span>
-                  <span className="text-xs text-foreground font-medium truncate max-w-48">
+                  <span className="text-foreground max-w-48 truncate text-xs font-medium">
                     {organization?.name || "Personal Workspace"}
                   </span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 p-3">
+                <div className="border-border/70 bg-muted/20 flex items-center justify-between rounded-lg border p-3">
                   <span className="text-muted-foreground text-xs">
                     User Permissions
                   </span>
-                  <Badge variant="secondary" className="text-[10px] font-mono capitalize">
+                  <Badge
+                    variant="secondary"
+                    className="font-mono text-[10px] capitalize"
+                  >
                     {orgRole || "Personal Owner"}
                   </Badge>
                 </div>
@@ -71,14 +75,14 @@ export function SettingsPage() {
 
         {/* Appearance Section */}
         <Card className="border-border/80 shadow-xs">
-          <CardHeader className="pb-3 border-b border-border/60">
+          <CardHeader className="border-border/60 border-b pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="bg-primary/5 text-primary flex size-8 items-center justify-center rounded-lg ring-1 ring-primary/10">
+                <div className="bg-primary/5 text-primary ring-primary/10 flex size-8 items-center justify-center rounded-lg ring-1">
                   <Palette className="size-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-semibold text-foreground">
+                  <CardTitle className="text-foreground text-sm font-semibold">
                     Theme & Interface
                   </CardTitle>
                   <CardDescription className="text-xs">
@@ -90,22 +94,26 @@ export function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-4">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Botly adheres to high-contrast WCAG AAA standards in both Light and Dark
-              modes. You can also press <code className="font-mono bg-muted px-1 py-0.5 rounded text-[11px]">D</code> on your keyboard anywhere to toggle themes quickly.
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Botly adheres to high-contrast WCAG AAA standards in both Light
+              and Dark modes. You can also press{" "}
+              <code className="bg-muted rounded px-1 py-0.5 font-mono text-[11px]">
+                D
+              </code>{" "}
+              on your keyboard anywhere to toggle themes quickly.
             </p>
           </CardContent>
         </Card>
 
         {/* Security & Access Section */}
         <Card className="border-border/80 shadow-xs">
-          <CardHeader className="pb-3 border-b border-border/60">
+          <CardHeader className="border-border/60 border-b pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="bg-primary/5 text-primary flex size-8 items-center justify-center rounded-lg ring-1 ring-primary/10">
+              <div className="bg-primary/5 text-primary ring-primary/10 flex size-8 items-center justify-center rounded-lg ring-1">
                 <Shield className="size-4" />
               </div>
               <div>
-                <CardTitle className="text-sm font-semibold text-foreground">
+                <CardTitle className="text-foreground text-sm font-semibold">
                   Authentication & Security
                 </CardTitle>
                 <CardDescription className="text-xs">
@@ -115,23 +123,24 @@ export function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-4">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Security policies, API keys, and SSO configurations are secured by Clerk
-              enterprise authentication. Manage your credentials and sessions through your user profile.
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Security policies, API keys, and SSO configurations are secured by
+              Clerk enterprise authentication. Manage your credentials and
+              sessions through your user profile.
             </p>
           </CardContent>
         </Card>
 
         {/* Billing Section */}
         <Card className="border-border/80 shadow-xs">
-          <CardHeader className="pb-3 border-b border-border/60">
+          <CardHeader className="border-border/60 border-b pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="bg-primary/5 text-primary flex size-8 items-center justify-center rounded-lg ring-1 ring-primary/10">
+                <div className="bg-primary/5 text-primary ring-primary/10 flex size-8 items-center justify-center rounded-lg ring-1">
                   <CreditCard className="size-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-semibold text-foreground">
+                  <CardTitle className="text-foreground text-sm font-semibold">
                     Subscription & Invoicing
                   </CardTitle>
                   <CardDescription className="text-xs">
@@ -139,23 +148,23 @@ export function SettingsPage() {
                   </CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary" className="text-[10px] font-mono">
+              <Badge variant="secondary" className="font-mono text-[10px]">
                 Starter Tier
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-4 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border/70 bg-muted/20 p-4">
+          <CardContent className="space-y-4 pt-4">
+            <div className="border-border/70 bg-muted/20 flex flex-col justify-between gap-4 rounded-xl border p-4 sm:flex-row sm:items-center">
               <div>
-                <span className="text-sm font-semibold text-foreground">
+                <span className="text-foreground text-sm font-semibold">
                   Free Starter Plan
                 </span>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-muted-foreground mt-0.5 text-xs">
                   2 of 5 active bots created • Standard vector retrieval
                 </p>
               </div>
               <Link to="/dashboard/billing">
-                <Button size="sm" className="gap-1.5 shadow-xs text-xs">
+                <Button size="sm" className="gap-1.5 text-xs shadow-xs">
                   <CreditCard className="size-3.5" />
                   <span>Manage Plans & Upgrade</span>
                 </Button>

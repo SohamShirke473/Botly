@@ -3,10 +3,7 @@ import multer from "multer"
 import { db } from "db"
 import { documents, chunks, bots } from "db/schema"
 import { eq, and, sql, desc } from "drizzle-orm"
-import {
-  requireOrgAuth,
-  verifyBotOrgAccess,
-} from "../middleware/auth"
+import { requireOrgAuth, verifyBotOrgAccess } from "../middleware/auth"
 import { validate } from "../middleware/validate"
 import { uploadFile, deleteFile } from "@botly/storage"
 import { logger } from "../lib/logger"

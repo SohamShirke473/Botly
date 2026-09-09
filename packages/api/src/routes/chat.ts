@@ -6,7 +6,11 @@ import { validate } from "../middleware/validate"
 import { chatRateLimiter } from "../middleware/rate-limit"
 import { embedText, streamText } from "@botly/ai"
 import { inngest } from "@botly/inngest"
-import { findRelevantChunks, buildRagPrompt, type RelevantChunk } from "../lib/rag"
+import {
+  findRelevantChunks,
+  buildRagPrompt,
+  type RelevantChunk,
+} from "../lib/rag"
 import { logger } from "../lib/logger"
 import {
   registerVisitorStream,
@@ -74,7 +78,8 @@ chatRouter.get(
     const publicConfig: BotPublicConfig = {
       id: bot.id,
       name: bot.name,
-      widgetConfig: (bot.widgetTheme as WidgetConfig | null) ?? DEFAULT_WIDGET_CONFIG,
+      widgetConfig:
+        (bot.widgetTheme as WidgetConfig | null) ?? DEFAULT_WIDGET_CONFIG,
     }
 
     res.json(publicConfig)
@@ -144,9 +149,7 @@ chatRouter.get(
     const [convo] = await db
       .select()
       .from(conversations)
-      .where(
-        and(eq(conversations.id, convoId), eq(conversations.botId, botId))
-      )
+      .where(and(eq(conversations.id, convoId), eq(conversations.botId, botId)))
       .limit(1)
 
     if (!convo) {
@@ -199,7 +202,9 @@ chatRouter.get(
     res.flushHeaders?.()
 
     // Send initial connected acknowledgement
-    res.write(`data: ${JSON.stringify({ type: "connected", conversationId: convoId })}\n\n`)
+    res.write(
+      `data: ${JSON.stringify({ type: "connected", conversationId: convoId })}\n\n`
+    )
 
     const unregister = registerVisitorStream(convoId, res)
 
@@ -249,7 +254,9 @@ chatRouter.post(
       .limit(1)
 
     if (!convo) {
-      res.status(404).json({ error: "Not Found", message: "Conversation not found" })
+      res
+        .status(404)
+        .json({ error: "Not Found", message: "Conversation not found" })
       return
     }
 
@@ -300,7 +307,8 @@ chatRouter.post(
       .values({
         conversationId: convoId,
         role: "system",
-        content: "Visitor requested human support assistance. An agent will be connected shortly.",
+        content:
+          "Visitor requested human support assistance. An agent will be connected shortly.",
       })
       .returning()
 
@@ -352,7 +360,11 @@ chatRouter.post(
   validate({ params: BotIdParamSchema, body: SendChatMessageSchema }),
   async (req: Request, res: Response) => {
     const botId = String(req.params.botId)
-    const { conversationId: inputConvoId, visitorId, message: userMessage } = req.body
+    const {
+      conversationId: inputConvoId,
+      visitorId,
+      message: userMessage,
+    } = req.body
 
     // 1. Verify bot exists
     const [bot] = await db
@@ -519,7 +531,8 @@ chatRouter.post(
 
     // 5c. Build RAG prompt with system prompt & retrieved chunks
     const priorHistory = history.slice(0, -1).map((m) => ({
-      role: (m.role === "agent" ? "assistant" : m.role) as "user" | "assistant" | "system",
+      role: (m.role === "agent" ? "assistant" : m.role) as
+        "user" | "assistant" | "system",
       content: m.content,
     }))
     const { system, messages: promptMessages } = buildRagPrompt(
@@ -604,7 +617,9 @@ chatRouter.post(
             visitorId,
           },
         })
-        .catch((err) => logger.warn(err, "[Inngest] Failed to dispatch turn.completed event"))
+        .catch((err) =>
+          logger.warn(err, "[Inngest] Failed to dispatch turn.completed event")
+        )
     } catch (streamErr) {
       logger.error(streamErr, "[Stream Error]")
       res.write(

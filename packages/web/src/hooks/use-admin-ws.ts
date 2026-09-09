@@ -17,6 +17,7 @@ export function useAdminWs(options: UseAdminWsOptions = {}) {
   const [isConnected, setIsConnected] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const connectRef = useRef<() => void>(() => {})
 
   const connect = useCallback(() => {
     if (!orgId) return
@@ -106,7 +107,9 @@ export function useAdminWs(options: UseAdminWsOptions = {}) {
         setIsConnected(false)
         wsRef.current = null
         // Reconnect after 3 seconds
-        reconnectTimeoutRef.current = setTimeout(connect, 3000)
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connectRef.current()
+        }, 3000)
       }
 
       socket.onerror = (err) => {
@@ -119,6 +122,7 @@ export function useAdminWs(options: UseAdminWsOptions = {}) {
   }, [orgId, user, conversationId, onMessageReceived, queryClient])
 
   useEffect(() => {
+    connectRef.current = connect
     connect()
 
     return () => {
@@ -133,7 +137,11 @@ export function useAdminWs(options: UseAdminWsOptions = {}) {
 
   // Update subscription if conversationId changes
   useEffect(() => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && conversationId) {
+    if (
+      wsRef.current &&
+      wsRef.current.readyState === WebSocket.OPEN &&
+      conversationId
+    ) {
       wsRef.current.send(
         JSON.stringify({
           type: "subscribe",
